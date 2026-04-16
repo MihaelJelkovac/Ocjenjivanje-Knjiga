@@ -1,35 +1,29 @@
-using Lab2.Data;
 using Lab2.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lab2.Services;
 
 public class AuthorRepository : IAuthorRepository
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogMockStore _store;
 
-    public AuthorRepository(CatalogDbContext context)
+    public AuthorRepository(CatalogMockStore store)
     {
-        _context = context;
+        _store = store;
     }
 
-    public async Task<IReadOnlyList<Author>> GetAllAsync()
+    public Task<IReadOnlyList<Author>> GetAllAsync()
     {
-        var authors = await _context.Authors
-            .AsNoTracking()
+        IReadOnlyList<Author> authors = _store.Authors
             .OrderBy(author => author.LastName)
             .ThenBy(author => author.FirstName)
-            .ToListAsync();
+            .ToList();
 
-        return authors;
+        return Task.FromResult(authors);
     }
 
-    public async Task<Author?> GetByIdAsync(int id)
+    public Task<Author?> GetByIdAsync(int id)
     {
-        return await _context.Authors
-            .AsNoTracking()
-            .Include(author => author.Books)
-                .ThenInclude(book => book.Publisher)
-            .SingleOrDefaultAsync(item => item.Id == id);
+        var author = _store.Authors.SingleOrDefault(item => item.Id == id);
+        return Task.FromResult(author);
     }
 }

@@ -1,13 +1,10 @@
-using Lab2.Data;
 using Lab2.Services;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<CatalogDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Catalog") ?? "Data Source=lab2.db"));
+builder.Services.AddSingleton<CatalogMockStore>();
 builder.Services.AddScoped<IBookCatalogService, BookCatalogService>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
@@ -36,13 +33,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    dbContext.Database.EnsureCreated();
-    await CatalogDbSeeder.SeedAsync(dbContext);
-}
-
 
 app.Run();

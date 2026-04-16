@@ -1,35 +1,29 @@
-using Lab2.Data;
 using Lab2.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lab2.Services;
 
 public class UserRepository : IUserRepository
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogMockStore _store;
 
-    public UserRepository(CatalogDbContext context)
+    public UserRepository(CatalogMockStore store)
     {
-        _context = context;
+        _store = store;
     }
 
-    public async Task<IReadOnlyList<User>> GetAllAsync()
+    public Task<IReadOnlyList<User>> GetAllAsync()
     {
-        var users = await _context.Users
-            .AsNoTracking()
+        IReadOnlyList<User> users = _store.Users
             .OrderByDescending(user => user.ReputationPoints)
             .ThenBy(user => user.FullName)
-            .ToListAsync();
+            .ToList();
 
-        return users;
+        return Task.FromResult(users);
     }
 
-    public async Task<User?> GetByIdAsync(int id)
+    public Task<User?> GetByIdAsync(int id)
     {
-        return await _context.Users
-            .AsNoTracking()
-            .Include(user => user.Reviews)
-                .ThenInclude(review => review.Book)
-            .SingleOrDefaultAsync(item => item.Id == id);
+        var user = _store.Users.SingleOrDefault(item => item.Id == id);
+        return Task.FromResult(user);
     }
 }

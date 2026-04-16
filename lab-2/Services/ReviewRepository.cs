@@ -1,36 +1,28 @@
-using Lab2.Data;
 using Lab2.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lab2.Services;
 
 public class ReviewRepository : IReviewRepository
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogMockStore _store;
 
-    public ReviewRepository(CatalogDbContext context)
+    public ReviewRepository(CatalogMockStore store)
     {
-        _context = context;
+        _store = store;
     }
 
-    public async Task<IReadOnlyList<Review>> GetAllAsync()
+    public Task<IReadOnlyList<Review>> GetAllAsync()
     {
-        var reviews = await _context.Reviews
-            .AsNoTracking()
-            .Include(review => review.Book)
-            .Include(review => review.User)
+        IReadOnlyList<Review> reviews = _store.Reviews
             .OrderByDescending(review => review.ReviewedAt)
-            .ToListAsync();
+            .ToList();
 
-        return reviews;
+        return Task.FromResult(reviews);
     }
 
-    public async Task<Review?> GetByIdAsync(int id)
+    public Task<Review?> GetByIdAsync(int id)
     {
-        return await _context.Reviews
-            .AsNoTracking()
-            .Include(review => review.Book)
-            .Include(review => review.User)
-            .SingleOrDefaultAsync(item => item.Id == id);
+        var review = _store.Reviews.SingleOrDefault(item => item.Id == id);
+        return Task.FromResult(review);
     }
 }

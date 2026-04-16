@@ -1,34 +1,28 @@
-using Lab2.Data;
 using Lab2.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lab2.Services;
 
 public class GenreRepository : IGenreRepository
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogMockStore _store;
 
-    public GenreRepository(CatalogDbContext context)
+    public GenreRepository(CatalogMockStore store)
     {
-        _context = context;
+        _store = store;
     }
 
-    public async Task<IReadOnlyList<Genre>> GetAllAsync()
+    public Task<IReadOnlyList<Genre>> GetAllAsync()
     {
-        var genres = await _context.Genres
-            .AsNoTracking()
+        IReadOnlyList<Genre> genres = _store.Genres
             .OrderBy(genre => genre.Name)
-            .ToListAsync();
+            .ToList();
 
-        return genres;
+        return Task.FromResult(genres);
     }
 
-    public async Task<Genre?> GetByIdAsync(int id)
+    public Task<Genre?> GetByIdAsync(int id)
     {
-        return await _context.Genres
-            .AsNoTracking()
-            .Include(genre => genre.BookGenres)
-                .ThenInclude(bookGenre => bookGenre.Book)
-            .SingleOrDefaultAsync(item => item.Id == id);
+        var genre = _store.Genres.SingleOrDefault(item => item.Id == id);
+        return Task.FromResult(genre);
     }
 }

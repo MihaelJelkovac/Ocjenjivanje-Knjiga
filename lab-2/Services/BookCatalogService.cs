@@ -1,42 +1,24 @@
-using Lab2.Data;
 using Lab2.Models;
 using Lab2.ViewModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lab2.Services;
 
 public class BookCatalogService : IBookCatalogService
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogMockStore _store;
 
-    public BookCatalogService(CatalogDbContext context)
+    public BookCatalogService(CatalogMockStore store)
     {
-        _context = context;
+        _store = store;
     }
 
-    public async Task<BookDashboardViewModel> GetDashboardAsync()
+    public Task<BookDashboardViewModel> GetDashboardAsync()
     {
-        var books = await _context.Books
-            .AsNoTracking()
-            .Include(book => book.Author)
-            .Include(book => book.Publisher)
-            .Include(book => book.BookGenres)
-                .ThenInclude(bookGenre => bookGenre.Genre)
-            .Include(book => book.Reviews)
-                .ThenInclude(review => review.User)
-            .ToListAsync();
-
-        var genres = await _context.Genres
-            .AsNoTracking()
-            .Include(genre => genre.BookGenres)
-            .ToListAsync();
-
-        var reviews = await _context.Reviews
-            .AsNoTracking()
-            .Include(review => review.Book)
-            .Include(review => review.User)
+        var books = _store.Books.ToList();
+        var genres = _store.Genres.ToList();
+        var reviews = _store.Reviews
             .OrderByDescending(review => review.ReviewedAt)
-            .ToListAsync();
+            .ToList();
 
         var topBooks = books
             .Select(BuildBookCard)
@@ -68,19 +50,21 @@ public class BookCatalogService : IBookCatalogService
             .ThenByDescending(stat => stat.BookCount)
             .ToList();
 
-        return new BookDashboardViewModel
+        var dashboard = new BookDashboardViewModel
         {
             TotalBooks = books.Count,
-            TotalAuthors = await _context.Authors.CountAsync(),
-            TotalUsers = await _context.Users.CountAsync(),
+            TotalAuthors = _store.Authors.Count,
+            TotalUsers = _store.Users.Count,
             OverallAverageRating = CalculateOverallAverageRating(reviews),
             TopBooks = topBooks.Take(3).ToList(),
             RecentReviews = recentReviews,
             GenreStats = genreStats
         };
+
+        return Task.FromResult(dashboard);
     }
 
-    private BookCardViewModel BuildBookCard(Book book)
+    private static BookCardViewModel BuildBookCard(Book book)
     {
         var reviewCount = book.Reviews.Count;
         var averageRating = reviewCount == 0 ? 0 : book.Reviews.Average(review => review.Score);

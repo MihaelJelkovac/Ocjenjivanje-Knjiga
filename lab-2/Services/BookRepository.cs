@@ -1,44 +1,28 @@
-using Lab2.Data;
 using Lab2.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lab2.Services;
 
 public class BookRepository : IBookRepository
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogMockStore _store;
 
-    public BookRepository(CatalogDbContext context)
+    public BookRepository(CatalogMockStore store)
     {
-        _context = context;
+        _store = store;
     }
 
-    public async Task<IReadOnlyList<Book>> GetAllAsync()
+    public Task<IReadOnlyList<Book>> GetAllAsync()
     {
-        var books = await _context.Books
-            .AsNoTracking()
-            .Include(book => book.Author)
-            .Include(book => book.Publisher)
-            .Include(book => book.BookGenres)
-                .ThenInclude(bookGenre => bookGenre.Genre)
-            .Include(book => book.Reviews)
-                .ThenInclude(review => review.User)
+        IReadOnlyList<Book> books = _store.Books
             .OrderBy(book => book.Title)
-            .ToListAsync();
+            .ToList();
 
-        return books;
+        return Task.FromResult(books);
     }
 
-    public async Task<Book?> GetByIdAsync(int id)
+    public Task<Book?> GetByIdAsync(int id)
     {
-        return await _context.Books
-            .AsNoTracking()
-            .Include(book => book.Author)
-            .Include(book => book.Publisher)
-            .Include(book => book.BookGenres)
-                .ThenInclude(bookGenre => bookGenre.Genre)
-            .Include(book => book.Reviews)
-                .ThenInclude(review => review.User)
-            .SingleOrDefaultAsync(item => item.Id == id);
+        var book = _store.Books.SingleOrDefault(item => item.Id == id);
+        return Task.FromResult(book);
     }
 }
