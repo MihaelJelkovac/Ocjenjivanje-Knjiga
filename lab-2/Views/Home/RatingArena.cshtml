@@ -1,0 +1,77 @@
+@model BookDashboardViewModel
+@{
+    ViewData["Title"] = "Rating Arena";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Rating Arena</li>
+    </ol>
+</nav>
+
+<section class="hero-panel mb-4">
+    <div class="hero-copy">
+        <p class="eyebrow">Custom page · Lab 2</p>
+        <h1>Rating Arena</h1>
+        <p class="lead">Specifična stranica za brzu analizu ocjenjivanja knjiga i navigaciju kroz sve entitete.</p>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-card">
+            <span>Knjiga</span>
+            <strong>@Model.TotalBooks</strong>
+        </div>
+        <div class="stat-card">
+            <span>Autora</span>
+            <strong>@Model.TotalAuthors</strong>
+        </div>
+        <div class="stat-card">
+            <span>Korisnika</span>
+            <strong>@Model.TotalUsers</strong>
+        </div>
+        <div class="stat-card stat-accent">
+            <span>Prosjek</span>
+            <strong>@Model.OverallAverageRating.ToString("0.0")</strong>
+        </div>
+    </div>
+</section>
+
+<section class="panel-card mb-4">
+    <div class="panel-header">
+        <h2>Brza navigacija</h2>
+    </div>
+
+    <div class="arena-links">
+        <a asp-controller="Books" asp-action="Index">Knjige</a>
+        <a asp-controller="Authors" asp-action="Index">Autori</a>
+        <a asp-controller="Genres" asp-action="Index">Žanrovi</a>
+        <a asp-controller="Publishers" asp-action="Index">Izdavači</a>
+        <a asp-controller="Reviews" asp-action="Index">Recenzije</a>
+        <a asp-controller="Users" asp-action="Index">Korisnici</a>
+    </div>
+</section>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <h2>Top 3 naslova</h2>
+    </div>
+
+    <div class="book-list">
+        @foreach (var book in Model.TopBooks)
+        {
+            <article class="book-card">
+                <div class="book-card-top">
+                    <div>
+                        <h3>@book.Title</h3>
+                        <p>@book.AuthorName</p>
+                    </div>
+                    <span class="rating-pill">@book.AverageRating.ToString("0.0")</span>
+                </div>
+                <div class="rating-row">
+                    <a asp-controller="Books" asp-action="Details" asp-route-id="@book.Id">Otvori details</a>
+                    <span>@book.ReviewCount recenzija</span>
+                </div>
+            </article>
+        }
+    </div>
+</section>

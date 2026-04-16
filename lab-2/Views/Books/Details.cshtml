@@ -1,0 +1,54 @@
+@model Book
+@{
+    ViewData["Title"] = "Detalji knjige";
+    var average = Model.Reviews.Count == 0 ? 0 : Model.Reviews.Average(review => review.Score);
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Books" asp-action="Index">Knjige</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+    </ol>
+</nav>
+
+<section class="panel-card mb-4">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Details</p>
+            <h2>@Model.Title</h2>
+        </div>
+        <span class="status-badge">@Model.Status</span>
+    </div>
+
+    <p><strong>Autor:</strong> <a asp-controller="Authors" asp-action="Details" asp-route-id="@Model.AuthorId">@Model.Author.FirstName @Model.Author.LastName</a></p>
+    <p><strong>Izdavač:</strong> <a asp-controller="Publishers" asp-action="Details" asp-route-id="@Model.PublisherId">@Model.Publisher.Name</a></p>
+    <p><strong>ISBN:</strong> @Model.Isbn</p>
+    <p><strong>Objavljeno:</strong> @Model.PublishedOn.ToString("dd.MM.yyyy.")</p>
+    <p><strong>Stranica:</strong> @Model.PageCount</p>
+    <p><strong>Jezik:</strong> @Model.Language</p>
+    <p><strong>Prosječna ocjena:</strong> @average.ToString("0.0")</p>
+    <p>@Model.Description</p>
+
+    <div class="book-meta">
+        <span><strong>Žanrovi:</strong></span>
+        <span>
+            @string.Join(", ", Model.BookGenres.OrderBy(bg => bg.Genre.Name).Select(bg => bg.Genre.Name))
+        </span>
+    </div>
+</section>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <h2>Recenzije</h2>
+    </div>
+    <ul class="app-linked-list">
+        @foreach (var review in Model.Reviews.OrderByDescending(review => review.ReviewedAt))
+        {
+            <li>
+                <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id">@review.Title (@review.Score/5)</a>
+                - @review.User.FullName
+            </li>
+        }
+    </ul>
+</section>

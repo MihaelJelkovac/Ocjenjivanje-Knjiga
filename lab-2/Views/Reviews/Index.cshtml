@@ -1,0 +1,49 @@
+@model IReadOnlyList<Review>
+@{
+    ViewData["Title"] = "Recenzije";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Recenzije</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Index</p>
+            <h2>Recenzije knjiga</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Naslov</th>
+                    <th>Ocjena</th>
+                    <th>Knjiga</th>
+                    <th>Korisnik</th>
+                    <th>Datum</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var review in Model)
+                {
+                    <tr>
+                        <td>@review.Title</td>
+                        <td>@review.Score/5</td>
+                        <td>@review.Book.Title</td>
+                        <td>@review.User.FullName</td>
+                        <td>@review.ReviewedAt.ToString("dd.MM.yyyy.")</td>
+                        <td><a asp-action="Details" asp-route-id="@review.Id">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

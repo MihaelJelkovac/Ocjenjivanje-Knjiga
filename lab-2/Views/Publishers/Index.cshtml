@@ -1,0 +1,47 @@
+@model IReadOnlyList<Publisher>
+@{
+    ViewData["Title"] = "Izdavači";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Izdavači</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Index</p>
+            <h2>Izdavači</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Naziv</th>
+                    <th>Lokacija</th>
+                    <th>Osnovan</th>
+                    <th>Knjige</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var publisher in Model)
+                {
+                    <tr>
+                        <td>@publisher.Name</td>
+                        <td>@publisher.City, @publisher.Country</td>
+                        <td>@publisher.FoundedOn.ToString("yyyy")</td>
+                        <td>@publisher.Books.Count</td>
+                        <td><a asp-action="Details" asp-route-id="@publisher.Id">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

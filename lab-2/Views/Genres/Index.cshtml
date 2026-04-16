@@ -1,0 +1,45 @@
+@model IReadOnlyList<Genre>
+@{
+    ViewData["Title"] = "Žanrovi";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Žanrovi</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Index</p>
+            <h2>Žanrovi</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Naziv</th>
+                    <th>Publika</th>
+                    <th>Knjige</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var genre in Model)
+                {
+                    <tr>
+                        <td>@genre.Name</td>
+                        <td>@genre.Audience</td>
+                        <td>@genre.BookGenres.Select(bg => bg.BookId).Distinct().Count()</td>
+                        <td><a asp-action="Details" asp-route-id="@genre.Id">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

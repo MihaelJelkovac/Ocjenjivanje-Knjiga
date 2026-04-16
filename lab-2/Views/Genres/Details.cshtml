@@ -1,0 +1,36 @@
+@model Genre
+@{
+    ViewData["Title"] = "Detalji žanra";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Genres" asp-action="Index">Žanrovi</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+    </ol>
+</nav>
+
+<section class="panel-card mb-4">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Details</p>
+            <h2>@Model.Name</h2>
+        </div>
+    </div>
+
+    <p><strong>Publika:</strong> @Model.Audience</p>
+    <p>@Model.Description</p>
+</section>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <h2>Knjige u žanru</h2>
+    </div>
+    <ul class="app-linked-list">
+        @foreach (var item in Model.BookGenres.OrderBy(bg => bg.Book.Title))
+        {
+            <li><a asp-controller="Books" asp-action="Details" asp-route-id="@item.BookId">@item.Book.Title</a></li>
+        }
+    </ul>
+</section>

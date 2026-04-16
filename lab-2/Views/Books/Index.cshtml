@@ -1,0 +1,48 @@
+@model IReadOnlyList<Book>
+@{
+    ViewData["Title"] = "Knjige";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Knjige</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Index</p>
+            <h2>Katalog knjiga</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Naslov</th>
+                    <th>Autor</th>
+                    <th>Status</th>
+                    <th>Prosjek</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var book in Model)
+                {
+                    var average = book.Reviews.Count == 0 ? 0 : book.Reviews.Average(review => review.Score);
+                    <tr>
+                        <td>@book.Title</td>
+                        <td>@book.Author.FirstName @book.Author.LastName</td>
+                        <td>@book.Status</td>
+                        <td>@average.ToString("0.0")</td>
+                        <td><a asp-action="Details" asp-route-id="@book.Id">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

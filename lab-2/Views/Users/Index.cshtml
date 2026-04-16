@@ -1,0 +1,49 @@
+@model IReadOnlyList<User>
+@{
+    ViewData["Title"] = "Korisnici";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Korisnici</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Index</p>
+            <h2>Korisnici</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Korisnik</th>
+                    <th>Email</th>
+                    <th>Reputacija</th>
+                    <th>Premium</th>
+                    <th>Recenzije</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.FullName (@user.Username)</td>
+                        <td>@user.Email</td>
+                        <td>@user.ReputationPoints</td>
+                        <td>@(user.IsPremiumMember ? "Da" : "Ne")</td>
+                        <td>@user.Reviews.Count</td>
+                        <td><a asp-action="Details" asp-route-id="@user.Id">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
