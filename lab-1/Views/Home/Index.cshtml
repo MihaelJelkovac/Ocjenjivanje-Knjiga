@@ -1,0 +1,124 @@
+﻿@model BookDashboardViewModel
+@{
+    ViewData["Title"] = "Ocijenjivanje Knjiga";
+}
+
+<section class="hero-panel mb-4">
+    <div class="hero-copy">
+        <p class="eyebrow">Lab 1 · Ocijenjivanje Knjiga</p>
+        <h1>Pregled najbolje ocijenjenih knjiga i recenzija</h1>
+        <p class="lead">Ova stranica prikazuje in-memory katalog s autorima, žanrovima, recenzijama i LINQ sažecima koje možeš lako objasniti na usmenom.</p>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-card">
+            <span>Knjiga</span>
+            <strong>@Model.TotalBooks</strong>
+        </div>
+        <div class="stat-card">
+            <span>Autora</span>
+            <strong>@Model.TotalAuthors</strong>
+        </div>
+        <div class="stat-card">
+            <span>Korisnika</span>
+            <strong>@Model.TotalUsers</strong>
+        </div>
+        <div class="stat-card stat-accent">
+            <span>Prosjek ocjena</span>
+            <strong>@Model.OverallAverageRating.ToString("0.0")</strong>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-xl-8">
+        <div class="panel-card h-100">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Top knjige</p>
+                    <h2>Najbolje ocijenjeni naslovi</h2>
+                </div>
+                <span class="panel-note">Sortirano po prosječnoj ocjeni i broju recenzija</span>
+            </div>
+
+            <div class="book-list">
+                @foreach (var book in Model.TopBooks)
+                {
+                    <article class="book-card">
+                        <div class="book-card-top">
+                            <div>
+                                <h3>@book.Title</h3>
+                                <p>@book.AuthorName · @book.PublisherName</p>
+                            </div>
+                            <span class="status-badge">@book.Status</span>
+                        </div>
+
+                        <div class="book-meta">
+                            <span>@book.Genres</span>
+                            <span>@book.PublishedOn.ToString("dd.MM.yyyy.")</span>
+                        </div>
+
+                        <div class="rating-row">
+                            <div class="rating-pill">@book.AverageRating.ToString("0.0") / 5</div>
+                            <div class="review-pill">@book.ReviewCount recenzija</div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+        <div class="panel-card h-100">
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">Žanrovi</p>
+                    <h2>Linq sažetak</h2>
+                </div>
+            </div>
+
+            <div class="mini-list">
+                @foreach (var genre in Model.GenreStats)
+                {
+                    <div class="mini-row">
+                        <div>
+                            <strong>@genre.GenreName</strong>
+                            <span>@genre.BookCount knjiga</span>
+                        </div>
+                        <div>@genre.AverageRating.ToString("0.0")</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-card">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Najnovije recenzije</p>
+            <h2>Async prikaz podataka</h2>
+        </div>
+        <span class="panel-note">Podaci dolaze iz async servisa</span>
+    </div>
+
+    <div class="review-grid">
+        @foreach (var review in Model.RecentReviews)
+        {
+            <article class="review-card">
+                <div class="review-card-head">
+                    <div>
+                        <h3>@review.BookTitle</h3>
+                        <p>@review.ReviewerName · @review.ReviewedAt.ToString("dd.MM.yyyy. HH:mm")</p>
+                    </div>
+                    <strong>@review.Score/5</strong>
+                </div>
+
+                <div class="review-labels">
+                    <span>@review.Sentiment</span>
+                </div>
+
+                <p>@review.Comment</p>
+            </article>
+        }
+    </div>
+</div>
