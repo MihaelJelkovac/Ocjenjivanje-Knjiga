@@ -17,17 +17,12 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        return View(await GetDashboardAsync());
+        return View(await _bookCatalogService.GetDashboardAsync());
     }
 
     public async Task<IActionResult> RatingArena()
     {
-        return View(await GetDashboardAsync());
-    }
-
-    private Task<BookDashboardViewModel> GetDashboardAsync()
-    {
-        return _bookCatalogService.GetDashboardAsync();
+        return View(await _bookCatalogService.GetDashboardAsync());
     }
 
     public IActionResult Privacy()
