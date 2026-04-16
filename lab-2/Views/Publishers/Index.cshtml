@@ -27,18 +27,16 @@
                     <th>Lokacija</th>
                     <th>Osnovan</th>
                     <th>Knjige</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var publisher in Model)
                 {
                     <tr>
-                        <td>@publisher.Name</td>
+                        <td><a asp-action="Details" asp-route-id="@publisher.Id">@publisher.Name</a></td>
                         <td>@publisher.City, @publisher.Country</td>
                         <td>@publisher.FoundedOn.ToString("yyyy")</td>
                         <td>@publisher.Books.Count</td>
-                        <td><a asp-action="Details" asp-route-id="@publisher.Id">Details</a></td>
                     </tr>
                 }
             </tbody>

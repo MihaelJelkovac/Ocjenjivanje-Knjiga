@@ -2,30 +2,32 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Lab2.Models;
 using Lab2.Services;
+using Lab2.ViewModels;
 
 namespace Lab2.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly IBookCatalogService _bookCatalogService;
 
-    public HomeController(ILogger<HomeController> logger, IBookCatalogService bookCatalogService)
+    public HomeController(IBookCatalogService bookCatalogService)
     {
-        _logger = logger;
         _bookCatalogService = bookCatalogService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var model = await _bookCatalogService.GetDashboardAsync();
-        return View(model);
+        return View(await GetDashboardAsync());
     }
 
     public async Task<IActionResult> RatingArena()
     {
-        var model = await _bookCatalogService.GetDashboardAsync();
-        return View(model);
+        return View(await GetDashboardAsync());
+    }
+
+    private Task<BookDashboardViewModel> GetDashboardAsync()
+    {
+        return _bookCatalogService.GetDashboardAsync();
     }
 
     public IActionResult Privacy()

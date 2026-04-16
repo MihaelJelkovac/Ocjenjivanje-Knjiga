@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Detalji knjige";
     var average = Model.Reviews.Count == 0 ? 0 : Model.Reviews.Average(review => review.Score);
+    var genres = Model.BookGenres.Count == 0
+        ? "Nema dodijeljenih žanrova"
+        : string.Join(", ", Model.BookGenres.OrderBy(bg => bg.Genre.Name).Select(bg => bg.Genre.Name));
+    var latestReviews = Model.Reviews.OrderByDescending(review => review.ReviewedAt).ToList();
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -12,43 +16,105 @@
     </ol>
 </nav>
 
-<section class="panel-card mb-4">
-    <div class="panel-header">
+<section class="panel-card books-details-hero mb-4" aria-labelledby="book-title">
+    <div class="panel-header books-details-top">
         <div>
             <p class="section-label">Details</p>
-            <h2>@Model.Title</h2>
+            <h2 id="book-title">@Model.Title</h2>
+            <p class="panel-note mb-0">Detaljan prikaz bibliografije, opisa i povezanih recenzija.</p>
         </div>
-        <span class="status-badge">@Model.Status</span>
+        <div class="books-details-badges">
+            <span class="status-badge">@Model.Status</span>
+            <span class="rating-pill">Ocjena @average.ToString("0.0")</span>
+        </div>
     </div>
 
-    <p><strong>Autor:</strong> <a asp-controller="Authors" asp-action="Details" asp-route-id="@Model.AuthorId">@Model.Author.FirstName @Model.Author.LastName</a></p>
-    <p><strong>Izdavač:</strong> <a asp-controller="Publishers" asp-action="Details" asp-route-id="@Model.PublisherId">@Model.Publisher.Name</a></p>
-    <p><strong>ISBN:</strong> @Model.Isbn</p>
-    <p><strong>Objavljeno:</strong> @Model.PublishedOn.ToString("dd.MM.yyyy.")</p>
-    <p><strong>Stranica:</strong> @Model.PageCount</p>
-    <p><strong>Jezik:</strong> @Model.Language</p>
-    <p><strong>Prosječna ocjena:</strong> @average.ToString("0.0")</p>
-    <p>@Model.Description</p>
+    <div class="books-details-actions">
+        <a class="btn btn-primary" asp-controller="Books" asp-action="Index">Natrag na listu knjiga</a>
+        <a class="app-cta-link" asp-controller="Authors" asp-action="Details" asp-route-id="@Model.AuthorId">Pregled
+            autora</a>
+            <a class="app-cta-link" asp-controller="Publishers" asp-action="Details"
+               asp-route-id="@Model.PublisherId">Pregled izdavača</a>
+        </div>
 
-    <div class="book-meta">
-        <span><strong>Žanrovi:</strong></span>
-        <span>
-            @string.Join(", ", Model.BookGenres.OrderBy(bg => bg.Genre.Name).Select(bg => bg.Genre.Name))
-        </span>
-    </div>
-</section>
+        <div class="books-detail-grid" role="list" aria-label="Metapodaci knjige">
+            <article class="books-detail-item" role="listitem">
+                <h3>Autor</h3>
+                <p>
+                    <a asp-controller="Authors" asp-action="Details" asp-route-id="@Model.AuthorId">@Model.Author.FirstName
+                        @Model.Author.LastName</a>
+                    </p>
+                </article>
+                <article class="books-detail-item" role="listitem">
+                    <h3>Izdavač</h3>
+                    <p>
+                        <a asp-controller="Publishers" asp-action="Details"
+                           asp-route-id="@Model.PublisherId">@Model.Publisher.Name</a>
+                    </p>
+                </article>
+                <article class="books-detail-item" role="listitem">
+                    <h3>Objava</h3>
+                    <p>@Model.PublishedOn.ToString("dd.MM.yyyy.")</p>
+                </article>
+                <article class="books-detail-item" role="listitem">
+                    <h3>Stranica</h3>
+                    <p>@Model.PageCount</p>
+                </article>
+                <article class="books-detail-item" role="listitem">
+                    <h3>Jezik</h3>
+                    <p>@Model.Language</p>
+                </article>
+                <article class="books-detail-item" role="listitem">
+                    <h3>ISBN</h3>
+                    <p>@Model.Isbn</p>
+                </article>
+            </div>
 
-<section class="panel-card">
-    <div class="panel-header">
-        <h2>Recenzije</h2>
-    </div>
-    <ul class="app-linked-list">
-        @foreach (var review in Model.Reviews.OrderByDescending(review => review.ReviewedAt))
-        {
-            <li>
-                <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id">@review.Title (@review.Score/5)</a>
-                - @review.User.FullName
-            </li>
-        }
-    </ul>
-</section>
+            <div class="books-detail-wide">
+                <h3>Žanrovi</h3>
+                <p>@genres</p>
+            </div>
+
+            <div class="books-detail-wide">
+                <h3>Opis</h3>
+                <p>@Model.Description</p>
+            </div>
+        </section>
+
+        <section class="panel-card" aria-labelledby="book-reviews-heading">
+            <div class="panel-header">
+                <div>
+                    <h2 id="book-reviews-heading">Recenzije</h2>
+                    <p class="panel-note mb-0">Najnovije recenzije i brzi pristup detaljima.</p>
+                </div>
+                <span class="review-pill">Ukupno @latestReviews.Count</span>
+            </div>
+
+            @if (!latestReviews.Any())
+            {
+                <div class="books-empty-state" role="status" aria-live="polite">
+                    <h3>Nema recenzija</h3>
+                    <p>Za ovu knjigu još nema recenzija. Provjeri kasnije ili odaberi drugu knjigu iz kataloga.</p>
+                    <a class="app-cta-link" asp-controller="Books" asp-action="Index">Povratak na katalog</a>
+                </div>
+            }
+            else
+            {
+                <div class="books-review-grid" role="list" aria-label="Lista recenzija">
+                    @foreach (var review in latestReviews)
+                    {
+                        <article class="books-review-card" role="listitem">
+                            <div class="books-review-head">
+                                <h3>
+                                    <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id">@review.Title</a>
+                                </h3>
+                                <span class="rating-pill">@review.Score/5</span>
+                            </div>
+                            <p class="mb-2"><strong>Korisnik:</strong> @review.User.FullName</p>
+                            <p class="mb-2"><strong>Sentiment:</strong> @review.Sentiment</p>
+                            <p class="mb-0"><strong>Datum:</strong> @review.ReviewedAt.ToString("dd.MM.yyyy.")</p>
+                        </article>
+                    }
+                </div>
+            }
+        </section>

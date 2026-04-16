@@ -26,17 +26,15 @@
                     <th>Naziv</th>
                     <th>Publika</th>
                     <th>Knjige</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var genre in Model)
                 {
                     <tr>
-                        <td>@genre.Name</td>
+                        <td><a asp-action="Details" asp-route-id="@genre.Id">@genre.Name</a></td>
                         <td>@genre.Audience</td>
                         <td>@genre.BookGenres.Select(bg => bg.BookId).Distinct().Count()</td>
-                        <td><a asp-action="Details" asp-route-id="@genre.Id">Details</a></td>
                     </tr>
                 }
             </tbody>

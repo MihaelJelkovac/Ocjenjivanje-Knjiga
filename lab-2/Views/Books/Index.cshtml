@@ -1,6 +1,10 @@
 @model IReadOnlyList<Book>
 @{
     ViewData["Title"] = "Knjige";
+    var totalBooks = Model.Count;
+    var totalReviews = Model.Sum(book => book.Reviews.Count);
+    var averageScore = totalReviews == 0 ? 0 : Model.SelectMany(book => book.Reviews).Average(review => review.Score);
+    var availableBooks = Model.Count(book => book.Status == BookStatus.Available);
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -10,39 +14,112 @@
     </ol>
 </nav>
 
-<section class="panel-card">
+<section class="panel-card books-index-hero mb-4" aria-labelledby="books-index-heading">
     <div class="panel-header">
         <div>
             <p class="section-label">Index</p>
-            <h2>Katalog knjiga</h2>
+            <h2 id="books-index-heading">Katalog knjiga</h2>
+            <p class="panel-note mb-0">Brz pregled naslova, autora i recenzija uz direktan pristup detaljima.</p>
         </div>
-        <span class="panel-note">@Model.Count zapisa</span>
+        <span class="panel-note">@totalBooks zapisa</span>
     </div>
 
-    <div class="table-responsive">
-        <table class="table app-table">
-            <thead>
-                <tr>
-                    <th>Naslov</th>
-                    <th>Autor</th>
-                    <th>Status</th>
-                    <th>Prosjek</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var book in Model)
-                {
-                    var average = book.Reviews.Count == 0 ? 0 : book.Reviews.Average(review => review.Score);
-                    <tr>
-                        <td>@book.Title</td>
-                        <td>@book.Author.FirstName @book.Author.LastName</td>
-                        <td>@book.Status</td>
-                        <td>@average.ToString("0.0")</td>
-                        <td><a asp-action="Details" asp-route-id="@book.Id">Details</a></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="books-index-stats" role="list" aria-label="Sažetak kataloga">
+        <article class="books-stat" role="listitem">
+            <span>Ukupno knjiga</span>
+            <strong>@totalBooks</strong>
+        </article>
+        <article class="books-stat" role="listitem">
+            <span>Dostupne</span>
+            <strong>@availableBooks</strong>
+        </article>
+        <article class="books-stat" role="listitem">
+            <span>Recenzije</span>
+            <strong>@totalReviews</strong>
+        </article>
+        <article class="books-stat" role="listitem">
+            <span>Prosječna ocjena</span>
+            <strong>@averageScore.ToString("0.0")</strong>
+        </article>
     </div>
 </section>
+
+@if (!Model.Any())
+{
+    <section class="panel-card books-empty-state" role="status" aria-live="polite">
+        <h3>Nema dostupnih knjiga</h3>
+        <p>Trenutno nema zapisa za prikaz. Vrati se na početnu stranicu i pokušaj ponovno kasnije.</p>
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Povratak na početnu</a>
+    </section>
+}
+else
+{
+    <section class="panel-card books-table-wrap d-none d-lg-block" aria-label="Tablični prikaz knjiga">
+        <div class="table-responsive">
+            <table class="table app-table books-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Naslov</th>
+                        <th scope="col">Autor</th>
+                        <th scope="col">Izdavač</th>
+                        <th scope="col">Žanrovi</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ocjena</th>
+                        <th scope="col">Recenzije</th>
+                        <th scope="col">Akcija</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var book in Model)
+                    {
+                        var average = book.Reviews.Count == 0 ? 0 : book.Reviews.Average(review => review.Score);
+                        var genres = book.BookGenres.Count == 0
+                            ? "-"
+                            : string.Join(", ", book.BookGenres.OrderBy(bg => bg.Genre.Name).Select(bg => bg.Genre.Name));
+                        <tr>
+                            <td class="book-title-cell">
+                                <a asp-action="Details" asp-route-id="@book.Id" aria-label="Detalji knjige @book.Title">@book.Title</a>
+                            </td>
+                            <td>@book.Author.FirstName @book.Author.LastName</td>
+                            <td>@(book.Publisher?.Name ?? "-")</td>
+                            <td>@genres</td>
+                            <td><span class="status-badge">@book.Status</span></td>
+                            <td>
+                                <span class="rating-pill">@average.ToString("0.0")</span>
+                            </td>
+                            <td>@book.Reviews.Count</td>
+                            <td>
+                                <a class="app-cta-link" asp-action="Details" asp-route-id="@book.Id">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="books-mobile-grid d-lg-none" aria-label="Kartični prikaz knjiga">
+        @foreach (var book in Model)
+        {
+            var average = book.Reviews.Count == 0 ? 0 : book.Reviews.Average(review => review.Score);
+            var genres = book.BookGenres.Count == 0
+                ? "Nema žanra"
+                : string.Join(", ", book.BookGenres.OrderBy(bg => bg.Genre.Name).Select(bg => bg.Genre.Name));
+
+            <article class="panel-card books-mobile-card">
+                <div class="books-mobile-head">
+                    <h3>@book.Title</h3>
+                    <span class="status-badge">@book.Status</span>
+                </div>
+                <p class="mb-2"><strong>Autor:</strong> @book.Author.FirstName @book.Author.LastName</p>
+                <p class="mb-2"><strong>Izdavač:</strong> @(book.Publisher?.Name ?? "-")</p>
+                <p class="mb-2"><strong>Žanrovi:</strong> @genres</p>
+                <div class="books-mobile-meta">
+                    <span class="rating-pill">Ocjena: @average.ToString("0.0")</span>
+                    <span class="review-pill">Recenzija: @book.Reviews.Count</span>
+                </div>
+                <a class="btn btn-primary books-mobile-cta" asp-action="Details" asp-route-id="@book.Id">Detalji knjige</a>
+            </article>
+        }
+    </section>
+}

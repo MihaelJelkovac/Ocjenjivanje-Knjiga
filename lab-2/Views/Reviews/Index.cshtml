@@ -28,19 +28,17 @@
                     <th>Knjiga</th>
                     <th>Korisnik</th>
                     <th>Datum</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var review in Model)
                 {
                     <tr>
-                        <td>@review.Title</td>
+                        <td><a asp-action="Details" asp-route-id="@review.Id">@review.Title</a></td>
                         <td>@review.Score/5</td>
-                        <td>@review.Book.Title</td>
+                        <td><a asp-controller="Books" asp-action="Details" asp-route-id="@review.BookId">@review.Book.Title</a></td>
                         <td>@review.User.FullName</td>
                         <td>@review.ReviewedAt.ToString("dd.MM.yyyy.")</td>
-                        <td><a asp-action="Details" asp-route-id="@review.Id">Details</a></td>
                     </tr>
                 }
             </tbody>
