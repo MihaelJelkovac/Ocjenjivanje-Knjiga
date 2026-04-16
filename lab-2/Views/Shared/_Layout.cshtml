@@ -5,71 +5,60 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Ocijenjivanje Knjiga</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Lab2.styles.css" asp-append-version="true" />
 </head>
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark app-nav mb-4">
-            <div class="container-fluid">
+        <nav class="app-nav mb-4">
+            <div class="container-fluid app-nav-inner">
                 <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">Ocijenjivanje
                     Knjiga</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="RatingArena">Rating Arena</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Books" asp-action="Index">Knjige</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Authors" asp-action="Index">Autori</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Genres" asp-action="Index">Žanrovi</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Publishers" asp-action="Index">Izdavači</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Reviews" asp-action="Index">Recenzije</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Users" asp-action="Index">Korisnici</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-        </header>
-        <div class="container app-shell">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
-
-        <footer class="footer app-footer text-muted">
-            <div class="container">
-                &copy; 2026 - Ocijenjivanje Knjiga
+                <ul class="app-nav-list">
+                    <li>
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Home" asp-action="RatingArena">Rating Arena</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Books" asp-action="Index">Knjige</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Authors" asp-action="Index">Autori</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Genres" asp-action="Index">Žanrovi</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Publishers" asp-action="Index">Izdavači</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Reviews" asp-action="Index">Recenzije</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Users" asp-action="Index">Korisnici</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                </ul>
             </div>
-        </footer>
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
+        </nav>
+    </header>
+    <div class="container app-shell">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer app-footer text-muted">
+        <div class="container">
+            &copy; 2026 - Ocijenjivanje Knjiga
+        </div>
+    </footer>
         @await RenderSectionAsync("Scripts", required: false)
-    </body>
+</body>
 
 </html>
