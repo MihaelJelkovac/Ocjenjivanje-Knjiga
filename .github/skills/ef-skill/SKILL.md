@@ -1,3 +1,11 @@
+---
+description: "Entity Framework (EF) Core operations - add/modify entities, run migrations, seed data"
+applyTo:
+  - "**/*DbContext.cs"
+  - "**/Models/*.cs"
+  - "**/Migrations/**"
+---
+
 # Entity Framework (EF) Core Skill - Lab 3
 
 Ovaj skill pružava smjernice za rad s Entity Framework Core u Lab 3 projektu.
@@ -18,13 +26,13 @@ Ovaj skill pružava smjernice za rad s Entity Framework Core u Lab 3 projektu.
 cd c:\Users\Mihael\Desktop\ASP.NET\lab-3
 
 # Kreiraj novu migraciju s opisnim nazivom
-dotnet-ef migrations add AddNewFeature
+dotnet ef migrations add AddNewFeature
 
 # Primjeni migraciju na bazu
-dotnet-ef database update
+dotnet ef database update
 
 # Prikaži listu svih migracija
-dotnet-ef migrations list
+dotnet ef migrations list
 ```
 
 ### 2. Uključivanje podataka pri konfiguraciji (DbContext.OnModelCreating)
@@ -113,13 +121,13 @@ modelBuilder.Entity<Award>()
 ### Korak 5: Kreiraj migraciju
 
 ```powershell
-dotnet-ef migrations add AddAwardEntity
+dotnet ef migrations add AddAwardEntity
 ```
 
 ### Korak 6: Primjeni migraciju
 
 ```powershell
-dotnet-ef database update
+dotnet ef database update
 ```
 
 ---
@@ -140,7 +148,7 @@ public class Book
 ### Korak 2: Kreiraj migraciju (EF će automatski detektirati promjenu)
 
 ```powershell
-dotnet-ef migrations add AddGenreFieldToBook
+dotnet ef migrations add AddGenreFieldToBook
 ```
 
 ### Korak 3: Pregledaj migracijsku datoteku
@@ -153,7 +161,7 @@ dotnet-ef migrations add AddGenreFieldToBook
 ### Korak 4: Primjeni migraciju
 
 ```powershell
-dotnet-ef database update
+dotnet ef database update
 ```
 
 ---
@@ -167,25 +175,25 @@ dotnet-ef database update
 Remove-Item catalog.db
 
 # Primjeni sve migracije ispočetka
-dotnet-ef database update
+dotnet ef database update
 ```
 
 ### P: Kako vidim SQL skripte koje EF generira?
 
 ```powershell
 # Izvezi migracije kao SQL script
-dotnet-ef migrations script
+dotnet ef migrations script
 ```
 
 ### P: Što ako migracija ne uspije primjenjivanja na bazu?
 
 ```powershell
 # Ukloni zadnju migraciju (ako je neuspješna)
-dotnet-ef migrations remove
+dotnet ef migrations remove
 
 # Ili resetiraj bazu i kreni ispočetka
 Remove-Item catalog.db
-dotnet-ef database update
+dotnet ef database update
 ```
 
 ---
@@ -210,7 +218,7 @@ var book = await _context.Books
 
 ✓ **Provjerit migracije prije commitiranja**
 ```powershell
-dotnet-ef migrations list
+dotnet ef migrations list
 ```
 
 ---
@@ -228,7 +236,7 @@ dotnet-ef migrations list
 
 ## SQL Lite specifičnosti
 
-- Podržavaoreignke keys s `PRAGMA foreign_keys = ON`
+- Podržava foreignke keys s `PRAGMA foreign_keys = ON`
 - Ne podržava sve SQL tipove kao MSSQL
 - Optimalna za development i male projekte
 
@@ -241,13 +249,13 @@ cd c:\Users\Mihael\Desktop\ASP.NET\lab-3
 
 # 1. Promijeni model (npr. dodaj novo polje)
 # 2. Kreiraj migraciju
-dotnet-ef migrations add DescriptiveChangeName
+dotnet ef migrations add DescriptiveChangeName
 
 # 3. Pregledaj datoteku Migrations/XXX_DescriptiveChangeName.cs
 # (Opciono) Uređuj ako EF nije detektirao sve ispravno
 
 # 4. Primjeni promjene na bazu
-dotnet-ef database update
+dotnet ef database update
 
 # 5. Testiraj aplikaciju
 dotnet run
@@ -256,5 +264,5 @@ dotnet run
 ---
 
 **Verzija**: 1.0  
-**Zadnja ažurenja**: 2026-05-03  
-**Autor**: GitHub Copilot  
+**Zadnja ažurenja**: 2026-05-07  
+**Autor**: GitHub Copilot

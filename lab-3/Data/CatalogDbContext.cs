@@ -21,7 +21,6 @@ public class CatalogDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        optionsBuilder.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -90,28 +89,28 @@ public class CatalogDbContext : DbContext
         // BookGenres (linking books to genres)
         var bookGenres = new[]
         {
-            new BookGenre { BookId = 1, GenreId = 1, AddedAt = DateTime.Now },
-            new BookGenre { BookId = 2, GenreId = 1, AddedAt = DateTime.Now },
-            new BookGenre { BookId = 2, GenreId = 3, AddedAt = DateTime.Now },
-            new BookGenre { BookId = 3, GenreId = 1, AddedAt = DateTime.Now }
+            new BookGenre { BookId = 1, GenreId = 1, AddedAt = new DateTime(2024, 1, 1, 10, 0, 0) },
+            new BookGenre { BookId = 2, GenreId = 1, AddedAt = new DateTime(2024, 1, 2, 10, 0, 0) },
+            new BookGenre { BookId = 2, GenreId = 3, AddedAt = new DateTime(2024, 1, 2, 10, 15, 0) },
+            new BookGenre { BookId = 3, GenreId = 1, AddedAt = new DateTime(2024, 1, 3, 10, 0, 0) }
         };
         modelBuilder.Entity<BookGenre>().HasData(bookGenres);
 
         // Users
         var users = new[]
         {
-            new User { Id = 1, Username = "reader1", FullName = "Alice Reader", Email = "alice@example.com", JoinedAt = DateTime.Now, FavoriteGenre = "Fantasy", ReputationPoints = 150, IsPremiumMember = true },
-            new User { Id = 2, Username = "reader2", FullName = "Bob Smith", Email = "bob@example.com", JoinedAt = DateTime.Now, FavoriteGenre = "Science Fiction", ReputationPoints = 80, IsPremiumMember = false },
-            new User { Id = 3, Username = "reader3", FullName = "Carol White", Email = "carol@example.com", JoinedAt = DateTime.Now, FavoriteGenre = "Fantasy", ReputationPoints = 200, IsPremiumMember = true }
+            new User { Id = 1, Username = "reader1", FullName = "Alice Reader", Email = "alice@example.com", JoinedAt = new DateTime(2023, 1, 15, 8, 30, 0), FavoriteGenre = "Fantasy", ReputationPoints = 150, IsPremiumMember = true },
+            new User { Id = 2, Username = "reader2", FullName = "Bob Smith", Email = "bob@example.com", JoinedAt = new DateTime(2023, 2, 20, 9, 15, 0), FavoriteGenre = "Science Fiction", ReputationPoints = 80, IsPremiumMember = false },
+            new User { Id = 3, Username = "reader3", FullName = "Carol White", Email = "carol@example.com", JoinedAt = new DateTime(2023, 3, 10, 7, 45, 0), FavoriteGenre = "Fantasy", ReputationPoints = 200, IsPremiumMember = true }
         };
         modelBuilder.Entity<User>().HasData(users);
 
         // Reviews
         var reviews = new[]
         {
-            new Review { Id = 1, Score = 5, Title = "Amazing!", Comment = "Best book ever", ReviewedAt = DateTime.Now, IsRecommended = true, Sentiment = ReviewSentiment.Enthusiastic, BookId = 1, UserId = 1 },
-            new Review { Id = 2, Score = 4, Title = "Great read", Comment = "Very engaging", ReviewedAt = DateTime.Now, IsRecommended = true, Sentiment = ReviewSentiment.Positive, BookId = 2, UserId = 2 },
-            new Review { Id = 3, Score = 5, Title = "Epic!", Comment = "A masterpiece", ReviewedAt = DateTime.Now, IsRecommended = true, Sentiment = ReviewSentiment.Enthusiastic, BookId = 3, UserId = 3 }
+            new Review { Id = 1, Score = 5, Title = "Amazing!", Comment = "Best book ever", ReviewedAt = new DateTime(2024, 2, 10, 14, 30, 0), IsRecommended = true, Sentiment = ReviewSentiment.Enthusiastic, BookId = 1, UserId = 1 },
+            new Review { Id = 2, Score = 4, Title = "Great read", Comment = "Very engaging", ReviewedAt = new DateTime(2024, 2, 12, 16, 45, 0), IsRecommended = true, Sentiment = ReviewSentiment.Positive, BookId = 2, UserId = 2 },
+            new Review { Id = 3, Score = 5, Title = "Epic!", Comment = "A masterpiece", ReviewedAt = new DateTime(2024, 2, 15, 11, 20, 0), IsRecommended = true, Sentiment = ReviewSentiment.Enthusiastic, BookId = 3, UserId = 3 }
         };
         modelBuilder.Entity<Review>().HasData(reviews);
     }

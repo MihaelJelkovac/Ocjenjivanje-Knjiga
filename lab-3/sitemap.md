@@ -25,7 +25,7 @@ Primjer: /Home/Index, /Books/Details/1
 | `/home` | Home | Index | Home/Index.cshtml | Početna stranica (alternativno) |
 | `/home/index` | Home | Index | Home/Index.cshtml | Početna stranica (eksplicitno) |
 | `/arena` | Home | RatingArena | Home/RatingArena.cshtml | Stranu sa žanrovskim statistikama |
-| `/home/rating-arena` | Home | RatingArena | Home/RatingArena.cshtml | Stranu sa žanrovskim statistikama (alternativno) |
+| `/rating-arena` | Home | RatingArena | Home/RatingArena.cshtml | Stranu sa žanrovskim statistikama (alternativno) |
 | `/home/privacy` | Home | Privacy | Home/Privacy.cshtml | Stranica o privatnosti |
 | `/home/error` | Home | Error | Shared/Error.cshtml | Stranica greške |
 
