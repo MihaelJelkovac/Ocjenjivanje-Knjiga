@@ -2,40 +2,61 @@ using Lab3.Data;
 using Lab3.Models;
 using Lab3.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Lab3.Services;
 
 public class BookCatalogService : IBookCatalogService
 {
     private readonly CatalogDbContext _context;
+    private readonly IMemoryCache _cache;
+    private const string DashboardCacheKey = "dashboard_cache";
+    private static readonly TimeSpan DashboardCacheDuration = TimeSpan.FromMinutes(10);
 
-    public BookCatalogService(CatalogDbContext context)
+    public BookCatalogService(CatalogDbContext context, IMemoryCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<BookDashboardViewModel> GetDashboardAsync()
     {
+        // Try to get from cache first
+        if (_cache.TryGetValue(DashboardCacheKey, out BookDashboardViewModel? cachedDashboard))
+        {
+            return cachedDashboard!;
+        }
+
+        // Load books without Reviews (will use separate Reviews query with User info)
         var books = await _context.Books
             .Include(b => b.Author)
             .Include(b => b.Publisher)
             .Include(b => b.BookGenres)
             .ThenInclude(bg => bg.Genre)
-            .Include(b => b.Reviews)
+            .ToListAsync();
+
+        // Load all reviews with User and Book info for calculations and recent reviews panel
+        var reviews = await _context.Reviews
+            .Include(r => r.User)
+            .Include(r => r.Book)
+            .OrderByDescending(review => review.ReviewedAt)
             .ToListAsync();
 
         var genres = await _context.Genres
             .Include(g => g.BookGenres)
             .ToListAsync();
 
-        var reviews = await _context.Reviews
-            .Include(r => r.Book)
-            .Include(r => r.User)
-            .OrderByDescending(review => review.ReviewedAt)
-            .ToListAsync();
+        // Create dictionary for O(1) review lookup by BookId
+        var reviewsByBookId = reviews
+            .GroupBy(r => r.BookId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Count authors and users directly from database (efficient Count queries)
+        var authorsCount = await _context.Authors.CountAsync();
+        var usersCount = await _context.Users.CountAsync();
 
         var topBooks = books
-            .Select(BuildBookCard)
+            .Select(b => BuildBookCard(b, reviewsByBookId.GetValueOrDefault(b.Id, new List<Review>())))
             .OrderByDescending(book => book.AverageRating)
             .ThenByDescending(book => book.ReviewCount)
             .ToList();
@@ -44,7 +65,7 @@ public class BookCatalogService : IBookCatalogService
             .Take(5)
             .Select(review => new ReviewCardViewModel
             {
-                BookTitle = review.Book.Title,
+                BookTitle = review.Book?.Title ?? "-",
                 ReviewerName = review.User.FullName,
                 Score = review.Score,
                 Sentiment = review.Sentiment,
@@ -67,21 +88,29 @@ public class BookCatalogService : IBookCatalogService
         var dashboard = new BookDashboardViewModel
         {
             TotalBooks = books.Count,
-            TotalAuthors = await _context.Authors.CountAsync(),
-            TotalUsers = await _context.Users.CountAsync(),
+            TotalAuthors = authorsCount,
+            TotalUsers = usersCount,
             OverallAverageRating = CalculateOverallAverageRating(reviews),
             TopBooks = topBooks.Take(3).ToList(),
             RecentReviews = recentReviews,
             GenreStats = genreStats
         };
 
+        // Cache for 10 minutes with sliding expiration
+        var cacheOptions = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = DashboardCacheDuration,
+            SlidingExpiration = TimeSpan.FromMinutes(5)
+        };
+        _cache.Set(DashboardCacheKey, dashboard, cacheOptions);
+
         return dashboard;
     }
 
-    private static BookCardViewModel BuildBookCard(Book book)
+    private static BookCardViewModel BuildBookCard(Book book, IReadOnlyList<Review> bookReviews)
     {
-        var reviewCount = book.Reviews.Count;
-        var averageRating = reviewCount == 0 ? 0 : book.Reviews.Average(review => review.Score);
+        var reviewCount = bookReviews.Count;
+        var averageRating = reviewCount == 0 ? 0 : bookReviews.Average(review => review.Score);
 
         return new BookCardViewModel
         {

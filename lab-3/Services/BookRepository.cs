@@ -15,19 +15,20 @@ public class BookRepository : IBookRepository
 
     public async Task<IReadOnlyList<Book>> GetAllAsync()
     {
+        // For Index/List view: Load Author, Publisher, and Genres (without full Review details)
         return await _context.Books
             .Include(b => b.Author)
             .Include(b => b.Publisher)
             .Include(b => b.BookGenres)
             .ThenInclude(bg => bg.Genre)
             .Include(b => b.Reviews)
-            .ThenInclude(r => r.User)
             .OrderBy(book => book.Title)
             .ToListAsync();
     }
 
     public async Task<Book?> GetByIdAsync(int id)
     {
+        // For Details view: Load all related data including Review user info
         return await _context.Books
             .Include(b => b.Author)
             .Include(b => b.Publisher)

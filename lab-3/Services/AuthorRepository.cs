@@ -15,7 +15,9 @@ public class AuthorRepository : IAuthorRepository
 
     public async Task<IReadOnlyList<Author>> GetAllAsync()
     {
+        // Include Books to avoid N+1 when Views access author.Books.Count
         return await _context.Authors
+            .Include(a => a.Books)
             .OrderBy(author => author.LastName)
             .ThenBy(author => author.FirstName)
             .ToListAsync();
