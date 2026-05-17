@@ -1,0 +1,72 @@
+@model Author
+
+<div class="form-container">
+    @if (Model?.Id > 0)
+    {
+        <h2>Ažuriranje Autora</h2>
+    }
+    else
+    {
+        <h2>Dodaj Novog Autora</h2>
+    }
+
+    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" 
+          method="post" 
+          class="needs-validation"
+          novalidate>
+        
+        @if (Model?.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <div class="form-group mb-3">
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Biography" class="form-label"></label>
+            <textarea asp-for="Biography" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Biography" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="BirthDate" class="form-label">Datum Rođenja</label>
+            @{
+                ViewBag.FieldName = "BirthDate";
+                ViewBag.Value = Model?.BirthDate;
+            }
+            <partial name="_DateTimeControl" />
+            <span asp-validation-for="BirthDate" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Nationality" class="form-label"></label>
+            <input asp-for="Nationality" class="form-control" />
+            <span asp-validation-for="Nationality" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Website" class="form-label"></label>
+            <input asp-for="Website" class="form-control" />
+            <span asp-validation-for="Website" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Spremi</button>
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

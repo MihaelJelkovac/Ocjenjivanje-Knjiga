@@ -1,0 +1,70 @@
+@model User
+
+<div class="form-container">
+    @if (Model?.Id > 0)
+    {
+        <h2>Ažuriranje Korisnika</h2>
+    }
+    else
+    {
+        <h2>Dodaj Novog Korisnika</h2>
+    }
+
+    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" method="post" class="needs-validation" novalidate>
+        @if (Model?.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <div class="form-group mb-3">
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="FullName" class="form-label"></label>
+            <input asp-for="FullName" class="form-control" />
+            <span asp-validation-for="FullName" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" type="email" />
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="JoinedAt" class="form-label">Datum Pristupa</label>
+            @{ ViewBag.FieldName = "JoinedAt"; ViewBag.Value = Model?.JoinedAt; }
+            <partial name="_DateTimeControl" />
+            <span asp-validation-for="JoinedAt" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="FavoriteGenre" class="form-label"></label>
+            <input asp-for="FavoriteGenre" class="form-control" />
+            <span asp-validation-for="FavoriteGenre" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="ReputationPoints" class="form-label"></label>
+            <input asp-for="ReputationPoints" class="form-control" type="number" />
+            <span asp-validation-for="ReputationPoints" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="IsPremiumMember" class="form-label">Premium Član</label>
+            <input asp-for="IsPremiumMember" class="form-check-input" type="checkbox" />
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Spremi</button>
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

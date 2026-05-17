@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Lab 3: Launch (HTTPS)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build lab-3",
+            "program": "${workspaceFolder}/lab-3/bin/Debug/net9.0/Lab3.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/lab-3",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            }
+        },
+        {
+            "name": "Lab 4: Launch (HTTPS)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build lab-4",
+            "program": "${workspaceFolder}/lab-4/bin/Debug/net9.0/Lab4.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/lab-4",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            }
+        }
+    ]
+}
