@@ -156,8 +156,12 @@ public class BooksController : Controller
     {
         var results = await _bookRepository.GetAllAsync();
         return Json(results
-            .Where(b => b.Title.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase))
-            .Take(20)
+            .Where(b =>
+                b.Title.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase) ||
+                (b.Author != null && (b.Author.FirstName.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase) ||
+                                     b.Author.LastName.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase))) ||
+                (b.Publisher != null && b.Publisher.Name.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
+            .Take(50)
             .Select(b => new { id = b.Id, text = b.Title }));
     }
 

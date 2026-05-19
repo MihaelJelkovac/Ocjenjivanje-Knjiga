@@ -14,51 +14,63 @@
             <div class="container-fluid app-nav-inner">
                 <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">Ocijenjivanje
                     Knjiga</a>
-                <ul class="app-nav-list">
-                    <li>
-                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Home" asp-action="RatingArena">Rating Arena</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Books" asp-action="Index">Knjige</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Authors" asp-action="Index">Autori</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Genres" asp-action="Index">Žanrovi</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Publishers" asp-action="Index">Izdavači</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Reviews" asp-action="Index">Recenzije</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-controller="Users" asp-action="Index">Korisnici</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </header>
-    <div class="container app-shell">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="footer app-footer text-muted">
-        <div class="container">
-            &copy; 2026 - Ocijenjivanje Knjiga
+                    <ul class="app-nav-list">
+                        <li>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Home" asp-action="RatingArena">Rating Arena</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Books" asp-action="Index">Knjige</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Authors" asp-action="Index">Autori</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Genres" asp-action="Index">Žanrovi</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Publishers" asp-action="Index">Izdavači</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Reviews" asp-action="Index">Recenzije</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Users" asp-action="Index">Korisnici</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <div class="container app-shell">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
-    <script src="~/js/stars-animation.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+
+        <footer class="footer app-footer text-muted">
+            <div class="container">
+                &copy; 2026 - Ocijenjivanje Knjiga
+            </div>
+        </footer>
+
+        <!-- jQuery (potrebno za sve ostale skripte) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+        <!-- Validacija skripte -->
+        <partial name="_ValidationScriptsPartial" />
+
+        <!-- Custom skripte za autocomplete i datetime kontrole -->
+        <script src="~/js/autocomplete.js" asp-append-version="true"></script>
+        <script src="~/js/datetime-control.js" asp-append-version="true"></script>
+        <script src="~/js/search.js" asp-append-version="true"></script>
+        <script src="~/js/stars-animation.js" asp-append-version="true"></script>
+
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
 
 </html>

@@ -13,11 +13,24 @@
 <section class="panel-card">
     <div class="panel-header">
         <div>
-            <p class="section-label">Index</p>
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
+            </div>
             <h2>Recenzije knjiga</h2>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
     </div>
+
+    <!-- Search Form -->
+    <form class="search-form mb-3" data-search-url="/Reviews/Search">
+        <div class="form-group">
+            <label for="search-input" class="form-label">Pretraži recenzije</label>
+            <div class="input-group">
+                <input type="text" id="search-input" class="form-control" placeholder="Unesite naziv...">
+                <button type="reset" class="btn btn-outline-secondary">Očisti</button>
+            </div>
+        </div>
+    </form>
 
     <div class="table-responsive">
         <table class="table app-table">
@@ -33,15 +46,16 @@
             <tbody>
                 @foreach (var review in Model)
                 {
-                    <tr>
+                    <tr data-id="@review.Id">
                         <td><a asp-action="Details" asp-route-id="@review.Id">@review.Title</a></td>
                         <td>@review.Score/5</td>
-                        <td><a asp-controller="Books" asp-action="Details" asp-route-id="@review.BookId">@review.Book.Title</a></td>
-                        <td>@review.User.FullName</td>
-                        <td>@review.ReviewedAt.ToString("dd.MM.yyyy.")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>
+                        <td><a asp-controller="Books" asp-action="Details"
+                                   asp-route-id="@review.BookId">@review.Book.Title</a></td>
+                            <td>@review.User.FullName</td>
+                            <td>@review.ReviewedAt.ToString("dd.MM.yyyy.")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>

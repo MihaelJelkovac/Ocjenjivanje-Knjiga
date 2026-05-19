@@ -63,8 +63,9 @@ public class PublisherRepository : IPublisherRepository
 
     public async Task<IReadOnlyList<Publisher>> SearchAsync(string query)
     {
+        var queryLower = query.ToLower();
         return await _context.Publishers
-            .Where(p => p.DeletedAt == null && p.Name.Contains(query))
+            .Where(p => p.DeletedAt == null && p.Name.ToLower().Contains(queryLower))
             .Take(20)
             .ToListAsync();
     }

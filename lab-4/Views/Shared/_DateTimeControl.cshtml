@@ -8,110 +8,28 @@
 <div class="datetime-control">
     <div class="row g-2">
         <div class="col-md-6">
-            <input type="text" 
-                   id="@fieldName-date" 
-                   class="form-control datetime-input"
-                   placeholder="@dateFormat"
-                   value="@(value?.ToString(dateFormat) ?? "")"
-                   data-date-format="@dateFormat"
+            <input type="text" id="@fieldName-date" class="form-control datetime-input" placeholder="@dateFormat"
+                   value="@(value?.ToString(dateFormat) ?? "")" data-date-format="@dateFormat"
                    data-field-name="@fieldName" />
         </div>
         <div class="col-md-6">
-            <input type="text" 
-                   id="@fieldName-time" 
-                   class="form-control datetime-input"
-                   placeholder="@timeFormat"
-                   value="@(value?.ToString(timeFormat) ?? "")"
-                   data-time-format="@timeFormat"
+            <input type="text" id="@fieldName-time" class="form-control datetime-input" placeholder="@timeFormat"
+                   value="@(value?.ToString(timeFormat) ?? "")" data-time-format="@timeFormat"
                    data-field-name="@fieldName" />
         </div>
     </div>
     <input type="hidden" id="@fieldName-combined" name="@fieldName" />
 </div>
 
-@section Scripts {
-    <script type="text/javascript">
-        $(document).ready(function () {
-            const fieldName = "@fieldName";
-            const dateFormat = "@dateFormat";
-            const timeFormat = "@timeFormat";
-            
-            const $dateInput = $(`#${fieldName}-date`);
-            const $timeInput = $(`#${fieldName}-time`);
-            const $combinedInput = $(`#${fieldName}-combined`);
-            
-            function parseDate(dateStr, format) {
-                if (!dateStr) return null;
-                
-                if (format.includes('.')) {
-                    // dd.MM.yyyy format
-                    const parts = dateStr.split('.');
-                    if (parts.length !== 3) return null;
-                    
-                    const day = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
-                    const year = parseInt(parts[2]);
-                    
-                    return new Date(year, month - 1, day);
-                } else {
-                    // MM/dd/yyyy format
-                    const parts = dateStr.split('/');
-                    if (parts.length !== 3) return null;
-                    
-                    const month = parseInt(parts[0]);
-                    const day = parseInt(parts[1]);
-                    const year = parseInt(parts[2]);
-                    
-                    return new Date(year, month - 1, day);
-                }
-            }
-            
-            function updateCombinedValue() {
-                const dateStr = $dateInput.val();
-                const timeStr = $timeInput.val();
-                
-                if (dateStr && timeStr) {
-                    const dateObj = parseDate(dateStr, dateFormat);
-                    
-                    if (dateObj && !isNaN(dateObj.getTime())) {
-                        const [hours, minutes] = timeStr.split(':');
-                        dateObj.setHours(parseInt(hours) || 0, parseInt(minutes) || 0, 0);
-                        $combinedInput.val(dateObj.toISOString());
-                    }
-                }
-            }
-            
-            $dateInput.on("change", updateCombinedValue);
-            $timeInput.on("change", updateCombinedValue);
-            
-            // Validacija datuma
-            $dateInput.on("blur", function () {
-                const value = $(this).val();
-                if (value) {
-                    const dateObj = parseDate(value, dateFormat);
-                    
-                    if (!dateObj || isNaN(dateObj.getTime())) {
-                        $(this).addClass("is-invalid");
-                        $combinedInput.val("");
-                        return;
-                    }
-                    
-                    $(this).removeClass("is-invalid");
-                }
-            });
-        });
-    </script>
-}
-
 <style>
     .datetime-control {
         width: 100%;
     }
-    
+
     .datetime-input.is-invalid {
         border-color: #dc3545;
     }
-    
+
     .invalid-feedback {
         color: #dc3545;
         font-size: 0.875rem;

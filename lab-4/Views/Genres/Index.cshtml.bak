@@ -1,36 +1,23 @@
-@model IReadOnlyList<Genre>
+﻿@model IReadOnlyList<Genre>
 @{
-    ViewData["Title"] = "Žanrovi";
+    ViewData["Title"] = "Ĺ˝anrovi";
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb app-breadcrumb">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Žanrovi</li>
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">PoÄŤetna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Ĺ˝anrovi</li>
     </ol>
 </nav>
 
 <section class="panel-card">
     <div class="panel-header">
         <div>
-            <div>
-                <a class="btn btn-primary" asp-action="Create">Dodaj žanr</a>
-            </div>
-            <h2>Žanrovi</h2>
+            <p class="section-label">Index</p>
+            <h2>Ĺ˝anrovi</h2>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
     </div>
-
-    <!-- Search Form -->
-    <form class="search-form mb-3" data-search-url="/Genres/Search">
-        <div class="form-group">
-            <label for="search-input" class="form-label">Pretraži žanrove</label>
-            <div class="input-group">
-                <input type="text" id="search-input" class="form-control" placeholder="Unesite naziv...">
-                <button type="reset" class="btn btn-outline-secondary">Očisti</button>
-            </div>
-        </div>
-    </form>
 
     <div class="table-responsive">
         <table class="table app-table">
@@ -38,22 +25,21 @@
                 <tr>
                     <th>Naziv</th>
                     <th>Publika</th>
-                    <th>Knjige</th>
-                    <th>Akcije</th>
+                    <th>Knjige</th>`n <th>Akcije</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var genre in Model)
                 {
-                    <tr data-id="@genre.Id">
+                    <tr>
                         <td><a asp-action="Details" asp-route-id="@genre.Id">@genre.Name</a></td>
                         <td>@genre.Audience</td>
                         <td>@genre.BookGenres.Select(bg => bg.BookId).Distinct().Count()</td>
                         <td>
                             <a class="app-cta-link" asp-action="Details" asp-route-id="@genre.Id">Profil</a>
-                            <a class="app-cta-link" asp-action="Edit" asp-route-id="@genre.Id">Ažuriranje</a>
+                            <a class="app-cta-link" asp-action="Edit" asp-route-id="@genre.Id">AĹľuriranje</a>
                             <button type="button" class="app-cta-link btn-delete text-danger"
-                                    data-id="@genre.Id">Briši</button>
+                                    data-id="@genre.Id">BriĹˇi</button>
                         </td>
                     </tr>
                 }
@@ -69,13 +55,12 @@
                 e.preventDefault();
                 const id = e.target.dataset.id;
 
-                if (confirm('Jeste li sigurni da želite obrisati ovaj zapis?')) {
-                    fetch('/Genres/Delete', {
+                if (confirm('Jeste li sigurni da Ĺľelite obrisati ovaj zapis?')) {
+                    fetch(`/Genres/Delete/${id}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({ id: id })
+                        }
                     })
                         .then(response => response.json())
                         .then(data => {
@@ -85,12 +70,13 @@
                                 row.style.opacity = '0';
                                 setTimeout(() => row.remove(), 300);
                             } else {
-                                alert('Greška: ' + data.message);
+                                alert('GreĹˇka: ' + data.message);
                             }
                         })
-                        .catch(() => alert('Greška pri brisanju'));
+                        .catch(() => alert('GreĹˇka pri brisanju'));
                 }
             }
         });
     </script>
 }
+

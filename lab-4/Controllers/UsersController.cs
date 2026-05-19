@@ -133,4 +133,17 @@ public class UsersController : Controller
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }
+
+    [Route("search")]
+    public async Task<IActionResult> Search(string query)
+    {
+        var results = await _repository.GetAllAsync();
+        return Json(results
+            .Where(u =>
+                u.FullName.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase) ||
+                u.Username.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase) ||
+                u.Email.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .Select(u => new { id = u.Id, text = u.FullName }));
+    }
 }

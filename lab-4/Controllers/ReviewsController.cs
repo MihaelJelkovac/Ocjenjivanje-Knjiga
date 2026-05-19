@@ -176,4 +176,17 @@ public class ReviewsController : Controller
             })
             .ToList();
     }
+
+    [Route("search")]
+    public async Task<IActionResult> Search(string query)
+    {
+        var results = await _reviewRepository.GetAllAsync();
+        return Json(results
+            .Where(r =>
+                r.Title.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase) ||
+                (r.Book != null && r.Book.Title.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase)) ||
+                (r.User != null && r.User.FullName.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
+            .Take(50)
+            .Select(r => new { id = r.Id, text = r.Title }));
+    }
 }

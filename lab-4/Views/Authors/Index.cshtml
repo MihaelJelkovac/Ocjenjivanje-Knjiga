@@ -20,7 +20,10 @@
             <h2 id="authors-index-heading">Katalog autora</h2>
             <p class="panel-note mb-0">Pregledaj sve autore, njihovu nacionalnost i broj objavljenih knjiga.</p>
         </div>
-        <span class="panel-note">@totalAuthors autora</span>
+            <span class="panel-note">@totalAuthors autora</span>
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj autora</a>
+            </div>
     </div>
 
     <div class="authors-index-stats" role="list" aria-label="Sažetak kataloga autora">
@@ -49,6 +52,19 @@
 }
 else
 {
+    <!-- Forma za pretragu -->
+    <section class="panel-card search-section mb-4">
+        <form class="search-form" data-search-url="/Authors/Search">
+            <div class="form-group">
+                <label for="search-input" class="form-label">Pretraži autore</label>
+                <div class="input-group">
+                    <input type="text" id="search-input" class="form-control" placeholder="Unesite ime ili prezime...">
+                    <button type="reset" class="btn btn-outline-secondary">Očisti</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
     <section class="panel-card authors-table-wrap d-none d-lg-block" aria-label="Tablični prikaz autora">
         <div class="table-responsive">
             <table class="table app-table authors-table">
@@ -65,9 +81,10 @@ else
                 <tbody>
                     @foreach (var author in Model)
                     {
-                        <tr>
+                        <tr data-id="@author.Id">
                             <td class="author-name-cell">
-                                <a asp-action="Details" asp-route-id="@author.Id" aria-label="Profil autora @author.FirstName @author.LastName">
+                                <a asp-action="Details" asp-route-id="@author.Id"
+                                   aria-label="Profil autora @author.FirstName @author.LastName">
                                     @author.FirstName @author.LastName
                                 </a>
                             </td>
@@ -79,7 +96,7 @@ else
                             <td>
                                 @if (!string.IsNullOrEmpty(author.Website))
                                 {
-                                    <a href="@author.Website" target="_blank" rel="noopener noreferrer" 
+                                    <a href="@author.Website" target="_blank" rel="noopener noreferrer"
                                        aria-label="Website od @author.FirstName @author.LastName">
                                         Posjet
                                     </a>
@@ -92,7 +109,8 @@ else
                             <td>
                                 <a class="app-cta-link" asp-action="Details" asp-route-id="@author.Id">Profil</a>
                                 <a class="app-cta-link" asp-action="Edit" asp-route-id="@author.Id">Ažuriranje</a>
-                                <button type="button" class="app-cta-link btn-delete text-danger" data-id="@author.Id">Briši</button>
+                                <button type="button" class="app-cta-link btn-delete text-danger"
+                                        data-id="@author.Id">Briši</button>
                             </td>
                         </tr>
                     }
@@ -104,7 +122,7 @@ else
     <section class="authors-mobile-grid d-lg-none" aria-label="Kartični prikaz autora">
         @foreach (var author in Model)
         {
-            <article class="panel-card authors-mobile-card">
+            <article class="panel-card authors-mobile-card" data-id="@author.Id">
                 <div class="authors-mobile-head">
                     <h3>@author.FirstName @author.LastName</h3>
                 </div>
@@ -129,36 +147,33 @@ else
     </section>
 }
 
-@section Scripts {
 <script>
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-delete')) {
-        e.preventDefault();
-        const id = e.target.dataset.id;
-        
-        if (confirm('Jeste li sigurni da želite obrisati ovaj zapis?')) {
-            fetch('/Authors/Delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ id: id })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const row = e.target.closest('tr');
-                    row.style.transition = 'opacity 0.3s ease-out';
-                    row.style.opacity = '0';
-                    setTimeout(() => row.remove(), 300);
-                } else {
-                    alert('Greška: ' + data.message);
-                }
-            })
-            .catch(() => alert('Greška pri brisanju'));
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-delete')) {
+            e.preventDefault();
+            const id = e.target.dataset.id;
+
+            if (confirm('Jeste li sigurni da želite obrisati ovaj zapis?')) {
+                fetch(`/Authors/Delete/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const row = e.target.closest('tr, article');
+                            row.style.transition = 'opacity 0.3s ease-out';
+                            row.style.opacity = '0';
+                            setTimeout(() => row.remove(), 300);
+                        } else {
+                            alert('Greška: ' + data.message);
+                        }
+                    })
+                    .catch(() => alert('Greška pri brisanju'));
+            }
         }
-    }
-});
+    });
 </script>
-}
 

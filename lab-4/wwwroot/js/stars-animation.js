@@ -1,62 +1,105 @@
 // Konfiguracija
 const CONFIG = {
-    STAR_COUNT: 300,
+    MAX_STARS: 150,
+    INITIAL_STARS: 0, // Počni bez zvijezda, dodaj ih kontinualno
     STAR_SIZE: 2,
-    MIN_SPEED: 0.5,
-    MAX_SPEED: 3,
-    ROGUE_STAR_COUNT: 7,
-    COLOR: '#ffffff'
+    MIN_SPEED: 1,
+    MAX_SPEED: 5,
+    ROGUE_STAR_COUNT: 50, // 50 rogue zvijezda
+    COLOR: '#ffffff',
+    SPAWN_RATE: 4, // Svakih N framesa dodaj novu zvijezdu
+    CANVAS_FADE: 0.2 // Jača vidljivost - zvijezde jasno vidljive kroz sadržaj
 };
 
 let canvas, ctx;
 let stars = [];
-let mouse = { x: 0, y: 0 };
+let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 let rogueIndices = new Set();
 let spawnCounter = 0;
 let rogueAngle = {};
+let rogueCounter = 0;  // Brojač za rogue zvijezde
 
 function createStarFromEdge(index) {
     let x, y;
-    const isRogue = index < CONFIG.ROGUE_STAR_COUNT;
 
-    // Odaberi random rub
-    const edge = Math.floor(Math.random() * 4);
-    if (edge === 0) {
-        // Gornji rub
-        x = Math.random() * canvas.width;
-        y = -10;
-    } else if (edge === 1) {
-        // Donji rub
-        x = Math.random() * canvas.width;
-        y = canvas.height + 10;
-    } else if (edge === 2) {
-        // Lijevi rub
-        x = -10;
-        y = Math.random() * canvas.height;
+    // Određuj je li rogue na osnovu brojača
+    const isRogue = rogueCounter < CONFIG.ROGUE_STAR_COUNT;
+    if (isRogue) {
+        rogueCounter++;
+    }
+
+    if (isRogue) {
+        // ROGUE ZVIJEZDE: Dolaze s nasumične strane (bez vezanja na miš)
+        const side = Math.random() * 4;
+        if (side < 1) {
+            // Lijevo
+            x = -10;
+            y = Math.random() * canvas.height;
+        } else if (side < 2) {
+            // Desno
+            x = canvas.width + 10;
+            y = Math.random() * canvas.height;
+        } else if (side < 3) {
+            // Gore
+            x = Math.random() * canvas.width;
+            y = -10;
+        } else {
+            // Dolje
+            x = Math.random() * canvas.width;
+            y = canvas.height + 10;
+        }
     } else {
-        // Desni rub
-        x = canvas.width + 10;
-        y = Math.random() * canvas.height;
+        // OBIČNE ZVIJEZDE: Dolaze s suprotne strane od miša
+        const mouseCenterX = canvas.width / 2;
+        const mouseCenterY = canvas.height / 2;
+
+        const mouseOffsetX = mouse.x - mouseCenterX;
+        const mouseOffsetY = mouse.y - mouseCenterY;
+
+        // Kreiraj zvijezde na nasuprotnoj strani
+        if (Math.abs(mouseOffsetX) > Math.abs(mouseOffsetY)) {
+            // Miš je više sa strane (lijevo/desno), pa zvijezde dolaze sa suprotne strane
+            if (mouseOffsetX > 0) {
+                // Miš je desno, zvijezde dolaze s LIJEVE strane
+                x = -10;
+                y = Math.random() * canvas.height;
+            } else {
+                // Miš je lijevo, zvijezde dolaze s DESNE strane
+                x = canvas.width + 10;
+                y = Math.random() * canvas.height;
+            }
+        } else {
+            // Miš je više gore/dolje
+            if (mouseOffsetY > 0) {
+                // Miš je dolje, zvijezde dolaze ODOZGO
+                x = Math.random() * canvas.width;
+                y = -10;
+            } else {
+                // Miš je gore, zvijezde dolaze ODOZDO
+                x = Math.random() * canvas.width;
+                y = canvas.height + 10;
+            }
+        }
     }
 
     return {
         x: x,
         y: y,
-        speed: isRogue ? (CONFIG.MIN_SPEED + Math.random() * (CONFIG.MAX_SPEED - CONFIG.MIN_SPEED)) : CONFIG.MIN_SPEED,
+        speed: CONFIG.MIN_SPEED,
         isRogue: isRogue,
-        angle: Math.random() * Math.PI * 2 // Za random movement
+        angle: Math.random() * Math.PI * 2
     };
 }
 
 function animate() {
-    // Očisti canvas
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    // Očisti canvas sa jačom vidljivošću (viši opacity)
+    ctx.fillStyle = `rgba(0, 0, 0, ${CONFIG.CANVAS_FADE})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Kontinuirano dodaj nove zvijezde s rubova
     spawnCounter++;
-    if (spawnCounter % 10 === 0 && stars.length < CONFIG.STAR_COUNT * 1.5) {
-        // Svakih 10 framesa dodaj novu zvijezdu s ruba
+    if (spawnCounter % CONFIG.SPAWN_RATE === 0 && stars.length < CONFIG.MAX_STARS) {
+        // Dodaj novu zvijezdu s ruba
         const newStar = createStarFromEdge(stars.length);
         stars.push(newStar);
     }
@@ -64,18 +107,14 @@ function animate() {
     // Ažuriranje i iscrtavanje zvijezda
     ctx.fillStyle = CONFIG.COLOR;
 
-    for (let i = 0; i < stars.length; i++) {
+    // Broji zvijezde koje trebam ukloniti (obrnuto, od kraja prema početku)
+    for (let i = stars.length - 1; i >= 0; i--) {
         const star = stars[i];
 
         if (star.isRogue) {
-            // ROGUE ZVIJEZDE: Samo random gibanje, bez ovisnosti o mišu
-            // Promijeni smjer povremeno
-            if (Math.random() < 0.02) {
-                rogueAngle[i] = Math.random() * Math.PI * 2;
-            }
-
-            star.x += Math.cos(rogueAngle[i]) * star.speed;
-            star.y += Math.sin(rogueAngle[i]) * star.speed;
+            // ROGUE ZVIJEZDE: Gibaju se nasumično (bez vezanja na miš)
+            star.x += Math.cos(star.angle) * star.speed;
+            star.y += Math.sin(star.angle) * star.speed;
         } else {
             // NORMALNE ZVIJEZDE: Gibanje prema mišu
             const dx = mouse.x - star.x;
@@ -84,7 +123,6 @@ function animate() {
 
             if (distance > 0) {
                 const angle = Math.atan2(dy, dx);
-                // Brzina zavisi od distance mišu
                 const distanceFactor = Math.min(distance / 500, 1);
                 const speed = CONFIG.MIN_SPEED + distanceFactor * (CONFIG.MAX_SPEED - CONFIG.MIN_SPEED);
                 star.x += Math.cos(angle) * speed;
@@ -92,13 +130,20 @@ function animate() {
             }
         }
 
-        // Regeneriraj zvijezdu ako je izvan ekrana
+        // Ukloni zvijezdu ako je izvan ekrana ili blizu miša
+        const distToMouse = Math.hypot(mouse.x - star.x, mouse.y - star.y);
+
         if (star.x < -20 || star.x > canvas.width + 20 ||
-            star.y < -20 || star.y > canvas.height + 20) {
-            // Zamijeni sa novom zvijezdom s ruba
-            stars[i] = createStarFromEdge(i);
+            star.y < -20 || star.y > canvas.height + 20 ||
+            distToMouse < 30) {  // Ukloni ako je blizu miša (30px)
+            // Ako je obrisana rogue zvijezda, smanji brojač
+            if (star.isRogue) {
+                rogueCounter = Math.max(0, rogueCounter - 1);
+            }
+            // Ukloni zvijezdu
+            stars.splice(i, 1);
             if (star.isRogue && rogueAngle[i]) {
-                rogueAngle[i] = Math.random() * Math.PI * 2;
+                delete rogueAngle[i];
             }
         } else {
             // Iscrtaj zvijezdu
@@ -106,15 +151,6 @@ function animate() {
             ctx.arc(star.x, star.y, CONFIG.STAR_SIZE, 0, Math.PI * 2);
             ctx.fill();
         }
-    }
-
-    // Očisti stare rogue angles ako je array smanjen
-    if (stars.length < Object.keys(rogueAngle).length) {
-        Object.keys(rogueAngle).forEach(key => {
-            if (key >= stars.length) {
-                delete rogueAngle[key];
-            }
-        });
     }
 
     requestAnimationFrame(animate);
@@ -137,16 +173,9 @@ function initStars() {
     document.body.insertBefore(canvas, document.body.firstChild);
     ctx = canvas.getContext('2d');
 
-    // Kreiraj zvijezde
-    for (let i = 0; i < CONFIG.STAR_COUNT; i++) {
-        const star = createStarFromEdge(i);
-        stars.push(star);
-
-        if (i < CONFIG.ROGUE_STAR_COUNT) {
-            rogueIndices.add(i);
-            rogueAngle[i] = Math.random() * Math.PI * 2; // Random smjer
-        }
-    }
+    // Počni bez zvijezda - dodaj ih kontinualno tijekom animacije
+    stars = [];
+    rogueCounter = 0;  // Resetiraj brojač rogue zvijezda
 
     // Track mišu
     document.addEventListener('mousemove', (e) => {
