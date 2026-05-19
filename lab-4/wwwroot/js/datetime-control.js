@@ -4,11 +4,12 @@ $(document).ready(function () {
     $('.datetime-control').each(function () {
         const fieldName = $(this).find('.datetime-input').data('field-name');
         const dateFormat = $(this).find('.datetime-input').data('date-format');
-        const timeFormat = $(this).find('.datetime-input').data('time-format');
+        const $timeInput = $(`#${fieldName}-time`);
+        const timeFormat = $timeInput.data('time-format');
 
         const $dateInput = $(`#${fieldName}-date`);
-        const $timeInput = $(`#${fieldName}-time`);
         const $combinedInput = $(`#${fieldName}-combined`);
+        const hasTimeInput = $timeInput.length > 0;
 
         function parseDate(dateStr, format) {
             if (!dateStr) return null;
@@ -38,9 +39,9 @@ $(document).ready(function () {
 
         function updateCombinedValue() {
             const dateStr = $dateInput.val();
-            const timeStr = $timeInput.val();
+            const timeStr = hasTimeInput ? $timeInput.val() : "00:00";
 
-            if (dateStr && timeStr) {
+            if (dateStr && (timeStr || !hasTimeInput)) {
                 const dateObj = parseDate(dateStr, dateFormat);
 
                 if (dateObj && !isNaN(dateObj.getTime())) {
@@ -52,7 +53,9 @@ $(document).ready(function () {
         }
 
         $dateInput.on("change", updateCombinedValue);
-        $timeInput.on("change", updateCombinedValue);
+        if (hasTimeInput) {
+            $timeInput.on("change", updateCombinedValue);
+        }
 
         // Validacija datuma
         $dateInput.on("blur", function () {

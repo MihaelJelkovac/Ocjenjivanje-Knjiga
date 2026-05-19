@@ -54,6 +54,7 @@
                         <td>@(user.IsPremiumMember ? "Da" : "Ne")</td>
                         <td>@user.Reviews.Count</td>
                         <td>
+                            <a class="app-cta-link" asp-action="Create">Dodaj</a>
                             <a class="app-cta-link" asp-action="Details" asp-route-id="@user.Id">Profil</a>
                             <a class="app-cta-link" asp-action="Edit" asp-route-id="@user.Id">Ažuriranje</a>
                             <button type="button" class="app-cta-link btn-delete text-danger"

@@ -10,11 +10,8 @@
         <h2>Dodaj Novog Autora</h2>
     }
 
-    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" 
-          method="post" 
-          class="needs-validation"
-          novalidate>
-        
+    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" method="post" class="needs-validation" novalidate>
+
         @if (Model?.Id > 0)
         {
             <input type="hidden" asp-for="Id" />
@@ -43,6 +40,7 @@
             @{
                 ViewBag.FieldName = "BirthDate";
                 ViewBag.Value = Model?.BirthDate;
+                ViewBag.ShowTime = false;
             }
             <partial name="_DateTimeControl" />
             <span asp-validation-for="BirthDate" class="text-danger small"></span>

@@ -1,22 +1,26 @@
 @{
     string fieldName = ViewBag.FieldName ?? "dateTime";
     DateTime? value = ViewBag.Value as DateTime?;
-    string dateFormat = System.Globalization.CultureInfo.CurrentCulture.Name == "hr" ? "dd.MM.yyyy" : "MM/dd/yyyy";
+    string dateFormat = "dd.MM.yyyy";
     string timeFormat = "HH:mm";
+    bool showTime = ViewBag.ShowTime == null || System.Convert.ToBoolean(ViewBag.ShowTime);
 }
 
 <div class="datetime-control">
     <div class="row g-2">
-        <div class="col-md-6">
+        <div class="@(showTime ? "col-md-6" : "col-12")">
             <input type="text" id="@fieldName-date" class="form-control datetime-input" placeholder="@dateFormat"
                    value="@(value?.ToString(dateFormat) ?? "")" data-date-format="@dateFormat"
                    data-field-name="@fieldName" />
         </div>
-        <div class="col-md-6">
-            <input type="text" id="@fieldName-time" class="form-control datetime-input" placeholder="@timeFormat"
-                   value="@(value?.ToString(timeFormat) ?? "")" data-time-format="@timeFormat"
-                   data-field-name="@fieldName" />
-        </div>
+        @if (showTime)
+        {
+            <div class="col-md-6">
+                <input type="text" id="@fieldName-time" class="form-control datetime-input" placeholder="@timeFormat"
+                       value="@(value?.ToString(timeFormat) ?? "")" data-time-format="@timeFormat"
+                       data-field-name="@fieldName" />
+            </div>
+        }
     </div>
     <input type="hidden" id="@fieldName-combined" name="@fieldName" />
 </div>

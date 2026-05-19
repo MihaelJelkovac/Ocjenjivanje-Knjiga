@@ -1,8 +1,13 @@
 using Lab4.Data;
 using Lab4.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var croatianCulture = CultureInfo.GetCultureInfo("hr-HR");
+CultureInfo.DefaultThreadCurrentCulture = croatianCulture;
+CultureInfo.DefaultThreadCurrentUICulture = croatianCulture;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

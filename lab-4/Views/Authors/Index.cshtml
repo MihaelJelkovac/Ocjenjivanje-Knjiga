@@ -20,10 +20,10 @@
             <h2 id="authors-index-heading">Katalog autora</h2>
             <p class="panel-note mb-0">Pregledaj sve autore, njihovu nacionalnost i broj objavljenih knjiga.</p>
         </div>
-            <span class="panel-note">@totalAuthors autora</span>
-            <div>
-                <a class="btn btn-primary" asp-action="Create">Dodaj autora</a>
-            </div>
+        <span class="panel-note">@totalAuthors autora</span>
+        <div>
+            <a class="btn btn-primary" asp-action="Create">Dodaj autora</a>
+        </div>
     </div>
 
     <div class="authors-index-stats" role="list" aria-label="Sažetak kataloga autora">
@@ -107,6 +107,7 @@ else
                                 }
                             </td>
                             <td>
+                                <a class="app-cta-link" asp-action="Create">Dodaj</a>
                                 <a class="app-cta-link" asp-action="Details" asp-route-id="@author.Id">Profil</a>
                                 <a class="app-cta-link" asp-action="Edit" asp-route-id="@author.Id">Ažuriranje</a>
                                 <button type="button" class="app-cta-link btn-delete text-danger"
