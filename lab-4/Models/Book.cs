@@ -14,7 +14,7 @@ public class Book
 
     [Required(ErrorMessage = "ISBN je obavezan")]
     [StringLength(20, MinimumLength = 10)]
-    [RegularExpression(@"^\d{10}(\d{3})?$|^97[89]\d{10}$", ErrorMessage = "ISBN nije u ispravnom formatu")]
+    [Isbn(ErrorMessage = "ISBN nije u ispravnom formatu")]
     public string Isbn { get; set; } = string.Empty;
 
     [StringLength(2000)]

@@ -22,7 +22,7 @@
             </div>
         }
     </div>
-    <input type="hidden" id="@fieldName-combined" name="@fieldName" />
+    <input type="hidden" id="@fieldName-combined" name="@fieldName" value="@(value?.ToString("o") ?? "")" />
 </div>
 
 <style>

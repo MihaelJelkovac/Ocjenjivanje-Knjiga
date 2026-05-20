@@ -57,6 +57,8 @@ $(document).ready(function () {
             $timeInput.on("change", updateCombinedValue);
         }
 
+        updateCombinedValue();
+
         // Validacija datuma
         $dateInput.on("blur", function () {
             const value = $(this).val();

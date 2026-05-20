@@ -50,7 +50,6 @@
                         <td>@genre.Audience</td>
                         <td>@genre.BookGenres.Select(bg => bg.BookId).Distinct().Count()</td>
                         <td>
-                            <a class="app-cta-link" asp-action="Create">Dodaj</a>
                             <a class="app-cta-link" asp-action="Details" asp-route-id="@genre.Id">Profil</a>
                             <a class="app-cta-link" asp-action="Edit" asp-route-id="@genre.Id">Ažuriranje</a>
                             <button type="button" class="app-cta-link btn-delete text-danger"
