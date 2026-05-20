@@ -70,12 +70,11 @@
                 const id = e.target.dataset.id;
 
                 if (confirm('Jeste li sigurni da želite obrisati ovaj zapis?')) {
-                    fetch('/Genres/Delete', {
+                    fetch(`/Genres/Delete/${id}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({ id: id })
+                        }
                     })
                         .then(response => response.json())
                         .then(data => {

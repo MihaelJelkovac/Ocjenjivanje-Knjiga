@@ -68,9 +68,10 @@
 
         <div class="form-group mb-3">
             <label for="AuthorId-search" class="form-label">Autor</label>
-            @{
+            @{ 
                 ViewBag.FieldName = "AuthorId";
                 ViewBag.DisplayText = Model?.Author?.FirstName + " " + Model?.Author?.LastName;
+                ViewBag.ValueId = Model?.AuthorId;
                 ViewBag.Placeholder = "Pretraži autore...";
                 ViewBag.SearchUrl = "/Authors/Search";
             }
@@ -80,9 +81,10 @@
 
         <div class="form-group mb-3">
             <label for="PublisherId-search" class="form-label">Izdavač</label>
-            @{
+            @{ 
                 ViewBag.FieldName = "PublisherId";
                 ViewBag.DisplayText = Model?.Publisher?.Name;
+                ViewBag.ValueId = Model?.PublisherId;
                 ViewBag.Placeholder = "Pretraži izdavače...";
                 ViewBag.SearchUrl = "/Publishers/Search";
             }

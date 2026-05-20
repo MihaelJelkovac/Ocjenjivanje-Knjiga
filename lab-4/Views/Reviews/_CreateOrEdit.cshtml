@@ -54,14 +54,14 @@
 
         <div class="form-group mb-3">
             <label for="BookId-search" class="form-label">Knjiga</label>
-            @{ ViewBag.FieldName = "BookId"; ViewBag.DisplayText = Model?.Book?.Title; ViewBag.Placeholder = "Pretraži knjige..."; ViewBag.SearchUrl = "/Books/Search"; }
+            @{ ViewBag.FieldName = "BookId"; ViewBag.DisplayText = Model?.Book?.Title; ViewBag.ValueId = Model?.BookId; ViewBag.Placeholder = "Pretraži knjige..."; ViewBag.SearchUrl = "/Books/Search"; }
             <partial name="_AutocompleteDropdown" />
             <span asp-validation-for="BookId" class="text-danger small"></span>
         </div>
 
         <div class="form-group mb-3">
             <label for="UserId-search" class="form-label">Korisnik</label>
-            @{ ViewBag.FieldName = "UserId"; ViewBag.DisplayText = Model?.User?.FullName; ViewBag.Placeholder = "Pretraži korisnike..."; ViewBag.SearchUrl = "/Users/Search"; }
+            @{ ViewBag.FieldName = "UserId"; ViewBag.DisplayText = Model?.User?.FullName; ViewBag.ValueId = Model?.UserId; ViewBag.Placeholder = "Pretraži korisnike..."; ViewBag.SearchUrl = "/Users/Search"; }
             <partial name="_AutocompleteDropdown" />
             <span asp-validation-for="UserId" class="text-danger small"></span>
         </div>
