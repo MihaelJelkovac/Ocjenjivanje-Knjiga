@@ -6,9 +6,9 @@
 }
 
 <div class="autocomplete-wrapper">
-    <input type="text" id="@fieldName-search" class="form-control autocomplete-input" placeholder="@placeholder"
-           data-search-url="@searchUrl" data-field-name="@fieldName" data-display-text="@displayText"
-           value="@displayText" />
+    <input type="text" id="@fieldName-search" name="@($"{fieldName}-search")" class="form-control autocomplete-input"
+           placeholder="@placeholder" data-search-url="@searchUrl" data-field-name="@fieldName"
+           data-display-text="@displayText" value="@displayText" />
 
     <input type="hidden" id="@fieldName-id" name="@fieldName" value="@(ViewBag.ValueId?.ToString() ?? "")" />
 

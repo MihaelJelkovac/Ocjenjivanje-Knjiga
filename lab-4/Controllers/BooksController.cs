@@ -59,8 +59,50 @@ public class BooksController : Controller
     [Route("create")]
     public async Task<IActionResult> Create(Book model)
     {
+        // Try to resolve autocomplete display text to ids if the hidden id wasn't provided
+        var authorSearch = Request.Form["AuthorId-search"].FirstOrDefault();
+        Console.WriteLine($"authorSearch raw: '{authorSearch}'");
+        if (model.AuthorId == 0 && !string.IsNullOrWhiteSpace(authorSearch))
+        {
+            var allAuthors = await _authorRepository.GetAllAsync();
+            var exact = allAuthors.FirstOrDefault(a => ($"{a.FirstName} {a.LastName}").Equals(authorSearch, StringComparison.OrdinalIgnoreCase));
+            if (exact != null)
+            {
+                model.AuthorId = exact.Id;
+                ModelState.Remove("AuthorId");
+            }
+        }
+
+        var publisherSearch = Request.Form["PublisherId-search"].FirstOrDefault();
+        Console.WriteLine($"publisherSearch raw: '{publisherSearch}'");
+        if (model.PublisherId == 0 && !string.IsNullOrWhiteSpace(publisherSearch))
+        {
+            var allPubs = await _publisherRepository.GetAllAsync();
+            var exactPub = allPubs.FirstOrDefault(p => p.Name.Equals(publisherSearch, StringComparison.OrdinalIgnoreCase));
+            if (exactPub != null)
+            {
+                model.PublisherId = exactPub.Id;
+                ModelState.Remove("PublisherId");
+            }
+        }
+
+        // Remove navigation property binding errors (we validate by Ids)
+        ModelState.Remove("Author");
+        ModelState.Remove("Publisher");
+
         if (!ModelState.IsValid)
         {
+            // Log ModelState errors for debugging
+            foreach (var kv in ModelState)
+            {
+                var key = kv.Key;
+                var errors = kv.Value.Errors.Select(e => e.ErrorMessage).ToArray();
+                if (errors.Length > 0)
+                {
+                    Console.WriteLine($"ModelState[{key}]: {string.Join("; ", errors)}");
+                }
+            }
+
             await PopulateDropdownsAsync();
             return View(model);
         }

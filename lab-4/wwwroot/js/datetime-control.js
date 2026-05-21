@@ -48,8 +48,12 @@ $(document).ready(function () {
                     const [hours, minutes] = timeStr.split(':');
                     dateObj.setHours(parseInt(hours) || 0, parseInt(minutes) || 0, 0);
                     $combinedInput.val(dateObj.toISOString());
+                    return;
                 }
             }
+
+            // If we get here, date/time is invalid or empty — clear combined value
+            $combinedInput.val("");
         }
 
         $dateInput.on("change", updateCombinedValue);
@@ -58,6 +62,14 @@ $(document).ready(function () {
         }
 
         updateCombinedValue();
+
+        // Ensure combined value is set just before the parent form submits
+        const $form = $(this).closest('form');
+        if ($form.length) {
+            $form.on('submit', function () {
+                updateCombinedValue();
+            });
+        }
 
         // Validacija datuma
         $dateInput.on("blur", function () {
