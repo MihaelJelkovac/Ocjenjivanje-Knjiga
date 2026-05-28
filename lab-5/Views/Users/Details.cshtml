@@ -1,0 +1,43 @@
+@model User
+@{
+    ViewData["Title"] = "Detalji korisnika";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Users" asp-action="Index">Korisnici</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.FullName</li>
+    </ol>
+</nav>
+
+<section class="panel-card mb-4">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Details</p>
+            <h2>@Model.FullName</h2>
+        </div>
+        <span class="review-pill">@Model.ReputationPoints bodova</span>
+    </div>
+
+    <p><strong>Korisničko ime:</strong> @Model.Username</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Pridružen:</strong> @Model.JoinedAt.ToString("dd.MM.yyyy.")</p>
+    <p><strong>Omiljeni žanr:</strong> @Model.FavoriteGenre</p>
+    <p><strong>Premium:</strong> @(Model.IsPremiumMember ? "Da" : "Ne")</p>
+</section>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <h2>Recenzije korisnika</h2>
+    </div>
+    <ul class="app-linked-list">
+        @foreach (var review in Model.Reviews.OrderByDescending(review => review.ReviewedAt))
+        {
+            <li>
+                <a asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id">@review.Title (@review.Score/5)</a>
+                - @review.Book.Title
+            </li>
+        }
+    </ul>
+</section>

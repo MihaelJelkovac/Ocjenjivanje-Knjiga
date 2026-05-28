@@ -1,9 +1,10 @@
-using Lab4.Models;
-using Lab4.Services;
+using Lab5.Models;
+using Lab5.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace Lab4.Controllers;
+namespace Lab5.Controllers;
 
 [Route("[controller]")]
 [Route("autori")]
@@ -16,6 +17,7 @@ public class AuthorsController : Controller
         _repository = repository;
     }
 
+    [AllowAnonymous]
     [Route("")]
     [Route("index")]
     public async Task<IActionResult> Index()
@@ -24,6 +26,7 @@ public class AuthorsController : Controller
         return View(authors);
     }
 
+    [AllowAnonymous]
     [Route("{id:int}")]
     [Route("profil/{id:int}")]
     public async Task<IActionResult> Details(int id)
@@ -37,6 +40,7 @@ public class AuthorsController : Controller
         return View(author);
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet]
     [Route("create")]
     public IActionResult Create()
@@ -44,6 +48,7 @@ public class AuthorsController : Controller
         return View();
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost]
     [Route("create")]
     public async Task<IActionResult> Create(Author model)
@@ -65,6 +70,7 @@ public class AuthorsController : Controller
         }
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet]
     [Route("edit/{id:int}")]
     [ActionName("Edit")]
@@ -79,6 +85,7 @@ public class AuthorsController : Controller
         return View("Edit", author);
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost]
     [Route("edit/{id:int}")]
     [ActionName("Edit")]
@@ -115,6 +122,7 @@ public class AuthorsController : Controller
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
@@ -136,6 +144,7 @@ public class AuthorsController : Controller
         }
     }
 
+    [AllowAnonymous]
     [Route("search")]
     public async Task<IActionResult> Search(string query)
     {
@@ -143,3 +152,4 @@ public class AuthorsController : Controller
         return Json(results.Select(a => new { id = a.Id, text = $"{a.FirstName} {a.LastName}" }));
     }
 }
+

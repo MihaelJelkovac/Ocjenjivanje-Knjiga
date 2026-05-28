@@ -1,0 +1,5 @@
+@model Publisher
+@{ ViewData["Title"] = Model?.Id > 0 ? "Ažuriranje Izdavača" : "Dodaj Izdavača"; }
+<div class="container mt-4">
+    <partial name="_CreateOrEdit" model="Model" />
+</div>

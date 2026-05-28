@@ -1,0 +1,48 @@
+@model Lab5.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Registracija";
+}
+
+<div class="form-container">
+    <h2>Registracija</h2>
+
+    <form asp-action="Register" method="post" class="needs-validation" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="ConfirmPassword" class="form-label"></label>
+            <input asp-for="ConfirmPassword" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="OIB" class="form-label"></label>
+            <input asp-for="OIB" class="form-control" />
+            <span asp-validation-for="OIB" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="JMBG" class="form-label"></label>
+            <input asp-for="JMBG" class="form-control" />
+            <span asp-validation-for="JMBG" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Registriraj se</button>
+            <a asp-action="ExternalLogin" class="btn btn-outline-secondary">Registracija s Google</a>
+        </div>
+    </form>
+</div>

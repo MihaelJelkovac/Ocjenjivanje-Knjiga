@@ -1,0 +1,179 @@
+@model IReadOnlyList<Author>
+@{
+    ViewData["Title"] = "Autori";
+    var totalAuthors = Model.Count;
+    var totalBooks = Model.Sum(a => a.Books.Count);
+    var avgBooksPerAuthor = totalAuthors == 0 ? 0 : (decimal)totalBooks / totalAuthors;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Autori</li>
+    </ol>
+</nav>
+
+<section class="panel-card authors-index-hero mb-4" aria-labelledby="authors-index-heading">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Index</p>
+            <h2 id="authors-index-heading">Katalog autora</h2>
+            <p class="panel-note mb-0">Pregledaj sve autore, njihovu nacionalnost i broj objavljenih knjiga.</p>
+        </div>
+        <span class="panel-note">@totalAuthors autora</span>
+        <div>
+            <a class="btn btn-primary" asp-action="Create">Dodaj autora</a>
+        </div>
+    </div>
+
+    <div class="authors-index-stats" role="list" aria-label="Sažetak kataloga autora">
+        <article class="authors-stat" role="listitem">
+            <span>Ukupno autora</span>
+            <strong>@totalAuthors</strong>
+        </article>
+        <article class="authors-stat" role="listitem">
+            <span>Knjiga</span>
+            <strong>@totalBooks</strong>
+        </article>
+        <article class="authors-stat" role="listitem">
+            <span>Prosječno po autoru</span>
+            <strong>@avgBooksPerAuthor.ToString("0.0")</strong>
+        </article>
+    </div>
+</section>
+
+@if (!Model.Any())
+{
+    <section class="panel-card authors-empty-state" role="status" aria-live="polite">
+        <h3>Nema dostupnih autora</h3>
+        <p>Trenutno nema zapisa za prikaz. Vrati se na početnu stranicu i pokušaj ponovno kasnije.</p>
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Povratak na početnu</a>
+    </section>
+}
+else
+{
+    <!-- Forma za pretragu -->
+    <section class="panel-card search-section mb-4">
+        <form class="search-form" data-search-url="/Authors/Search">
+            <div class="form-group">
+                <label for="search-input" class="form-label">Pretraži autore</label>
+                <div class="input-group">
+                    <input type="text" id="search-input" class="form-control" placeholder="Unesite ime ili prezime...">
+                    <button type="reset" class="btn btn-outline-secondary">Očisti</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel-card authors-table-wrap d-none d-lg-block" aria-label="Tablični prikaz autora">
+        <div class="table-responsive">
+            <table class="table app-table authors-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Ime</th>
+                        <th scope="col">Nacionalnost</th>
+                        <th scope="col">Rođen</th>
+                        <th scope="col">Knjige</th>
+                        <th scope="col">Website</th>
+                        <th scope="col">Akcija</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var author in Model)
+                    {
+                        <tr data-id="@author.Id">
+                            <td class="author-name-cell">
+                                <a asp-action="Details" asp-route-id="@author.Id"
+                                   aria-label="Profil autora @author.FirstName @author.LastName">
+                                    @author.FirstName @author.LastName
+                                </a>
+                            </td>
+                            <td>@author.Nationality</td>
+                            <td>@author.BirthDate.ToString("dd.MM.yyyy.")</td>
+                            <td>
+                                <span class="badge badge-info">@author.Books.Count</span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(author.Website))
+                                {
+                                    <a href="@author.Website" target="_blank" rel="noopener noreferrer"
+                                       aria-label="Website od @author.FirstName @author.LastName">
+                                        Posjet
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <a class="app-cta-link" asp-action="Details" asp-route-id="@author.Id">Profil</a>
+                                <a class="app-cta-link" asp-action="Edit" asp-route-id="@author.Id">Ažuriranje</a>
+                                <button type="button" class="app-cta-link btn-delete text-danger"
+                                        data-id="@author.Id">Briši</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="authors-mobile-grid d-lg-none" aria-label="Kartični prikaz autora">
+        @foreach (var author in Model)
+        {
+            <article class="panel-card authors-mobile-card" data-id="@author.Id">
+                <div class="authors-mobile-head">
+                    <h3>@author.FirstName @author.LastName</h3>
+                </div>
+                <p class="mb-2"><strong>Nacionalnost:</strong> @author.Nationality</p>
+                <p class="mb-2"><strong>Rođen:</strong> @author.BirthDate.ToString("dd.MM.yyyy.")</p>
+                <div class="authors-mobile-meta">
+                    <span class="badge badge-info">@author.Books.Count knjiga</span>
+                </div>
+                @if (!string.IsNullOrEmpty(author.Website))
+                {
+                    <p class="mb-2">
+                        <a href="@author.Website" target="_blank" rel="noopener noreferrer">
+                            Posjet website →
+                        </a>
+                    </p>
+                }
+                <a class="btn btn-primary authors-mobile-cta" asp-action="Details" asp-route-id="@author.Id">
+                    Profil autora
+                </a>
+            </article>
+        }
+    </section>
+}
+
+<script>
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-delete')) {
+            e.preventDefault();
+            const id = e.target.dataset.id;
+
+            if (confirm('Jeste li sigurni da želite obrisati ovaj zapis?')) {
+                fetch(`/Authors/Delete/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const row = e.target.closest('tr, article');
+                            row.style.transition = 'opacity 0.3s ease-out';
+                            row.style.opacity = '0';
+                            setTimeout(() => row.remove(), 300);
+                        } else {
+                            alert('Greška: ' + data.message);
+                        }
+                    })
+                    .catch(() => alert('Greška pri brisanju'));
+            }
+        }
+    });
+</script>
+

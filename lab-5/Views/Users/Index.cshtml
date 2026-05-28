@@ -1,0 +1,99 @@
+@model IReadOnlyList<User>
+@{
+    ViewData["Title"] = "Korisnici";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Korisnici</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj korisnika</a>
+            </div>
+            <h2>Korisnici</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <!-- Search Form -->
+    <form class="search-form mb-3" data-search-url="/Users/Search">
+        <div class="form-group">
+            <label for="search-input" class="form-label">Pretraži korisnike</label>
+            <div class="input-group">
+                <input type="text" id="search-input" class="form-control" placeholder="Unesite naziv...">
+                <button type="reset" class="btn btn-outline-secondary">Očisti</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Korisnik</th>
+                    <th>Email</th>
+                    <th>Reputacija</th>
+                    <th>Premium</th>
+                    <th>Recenzije</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr data-id="@user.Id">
+                        <td><a asp-action="Details" asp-route-id="@user.Id">@user.FullName (@user.Username)</a></td>
+                        <td>@user.Email</td>
+                        <td>@user.ReputationPoints</td>
+                        <td>@(user.IsPremiumMember ? "Da" : "Ne")</td>
+                        <td>@user.Reviews.Count</td>
+                        <td>
+                            <a class="app-cta-link" asp-action="Details" asp-route-id="@user.Id">Profil</a>
+                            <a class="app-cta-link" asp-action="Edit" asp-route-id="@user.Id">Ažuriranje</a>
+                            <button type="button" class="app-cta-link btn-delete text-danger"
+                                    data-id="@user.Id">Briši</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('btn-delete')) {
+                e.preventDefault();
+                const id = e.target.dataset.id;
+
+                if (confirm('Jeste li sigurni da želite obrisati ovaj zapis?')) {
+                    fetch(`/Users/Delete/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const row = e.target.closest('tr');
+                                row.style.transition = 'opacity 0.3s ease-out';
+                                row.style.opacity = '0';
+                                setTimeout(() => row.remove(), 300);
+                            } else {
+                                alert('Greška: ' + data.message);
+                            }
+                        })
+                        .catch(() => alert('Greška pri brisanju'));
+                }
+            }
+        });
+    </script>
+}
