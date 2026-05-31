@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 
-<body>
+<body class="@(ViewData["IsAuthPage"] as bool? ?? false ? "auth-page" : "")">
     <header>
         <nav class="app-nav mb-4">
             <div class="container-fluid app-nav-inner">

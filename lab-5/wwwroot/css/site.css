@@ -965,11 +965,34 @@ button.accept-policy {
 .form-container {
   width: 100%;
   max-width: 420px;
+  margin: 0 auto;
   padding: 2rem;
   background-color: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: 0.75rem;
   box-shadow: var(--shadow-deep);
+}
+
+/* Auth pages - center the form container */
+body.auth-page {
+  display: flex;
+  flex-direction: column;
+}
+
+body.auth-page .app-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.auth-page main {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn {
