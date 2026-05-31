@@ -364,3 +364,40 @@ Ako trebate dodati nove podatke u bazu:
 ---
 
 **Lab 3 je spreman za testiranje!** 🚀
+
+---
+
+## Lab 5 - Run & Google setup
+
+Quick notes for running Lab 5 locally and enabling Google external login.
+
+- **Run the app (from repo root):**
+
+```powershell
+dotnet run --project lab-5/Lab5.csproj
+```
+
+- **Migrations / database:** Program will apply migrations on startup. To run manually:
+
+```powershell
+# from lab-5 folder
+cd lab-5
+dotnet ef database update
+```
+
+- **Enable Google external login (development):** create user-secrets for the project and set the client id/secret:
+
+```powershell
+cd lab-5
+dotnet user-secrets init
+dotnet user-secrets set "Authentication:Google:ClientId" "<your-client-id>"
+dotnet user-secrets set "Authentication:Google:ClientSecret" "<your-client-secret>"
+```
+
+Ensure HTTPS is enabled in `Properties/launchSettings.json` when testing external login.
+
+- **Notes:**
+   - API write endpoints (POST/PUT/DELETE) require roles: `Admin` or `Manager` (delete typically `Admin`).
+   - Attachments upload/delete endpoints require authorization (`Books/Attachments/Upload` requires `Admin,Manager`; delete requires `Admin`).
+   - Uploads are stored under `wwwroot/uploads/books/{bookId}`.
+

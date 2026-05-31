@@ -60,14 +60,5 @@ public class PublisherRepository : IPublisherRepository
         await _context.SaveChangesAsync();
         return true;
     }
-
-    public async Task<IReadOnlyList<Publisher>> SearchAsync(string query)
-    {
-        var queryLower = query.ToLower();
-        return await _context.Publishers
-            .Where(p => p.DeletedAt == null && p.Name.ToLower().Contains(queryLower))
-            .Take(20)
-            .ToListAsync();
-    }
 }
 

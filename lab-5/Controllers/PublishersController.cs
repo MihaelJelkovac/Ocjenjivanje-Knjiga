@@ -146,8 +146,11 @@ public class PublishersController : Controller
     [Route("search")]
     public async Task<IActionResult> Search(string query)
     {
-        var results = await _repository.SearchAsync(query ?? string.Empty);
-        return Json(results.Select(p => new { id = p.Id, text = p.Name }));
+        var results = await _repository.GetAllAsync();
+        return Json(results
+            .Where(p => p.Name.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .Select(p => new { id = p.Id, text = p.Name }));
     }
 }
 

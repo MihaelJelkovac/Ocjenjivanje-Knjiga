@@ -1,6 +1,7 @@
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
@@ -41,6 +42,7 @@ public class UsersApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<UserDto>> Create([FromBody] UserUpsertDto model)
     {
         var user = await _repository.CreateAsync(new User
@@ -58,6 +60,7 @@ public class UsersApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<UserDto>> Update(int id, [FromBody] UserUpsertDto model)
     {
         var user = await _repository.GetByIdAsync(id);
@@ -79,6 +82,7 @@ public class UsersApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);

@@ -13,7 +13,5 @@ public interface IPublisherRepository
     Task<bool> UpdateAsync(Publisher publisher);
 
     Task<bool> DeleteAsync(int id);
-
-    Task<IReadOnlyList<Publisher>> SearchAsync(string query);
 }
 

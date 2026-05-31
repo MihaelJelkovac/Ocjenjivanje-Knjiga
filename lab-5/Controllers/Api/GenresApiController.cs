@@ -1,6 +1,7 @@
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
@@ -19,9 +20,15 @@ public class GenresApiController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GenreDto>>> GetAll([FromQuery] string? query = null)
     {
-        var genres = string.IsNullOrWhiteSpace(query)
-            ? await _repository.GetAllAsync()
-            : await _repository.SearchAsync(query);
+        var genres = await _repository.GetAllAsync();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var normalized = query.Trim();
+            genres = genres.Where(g =>
+                g.Name.Contains(normalized, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         return Ok(genres.Select(ApiDtoMapper.ToDto));
     }
@@ -34,6 +41,7 @@ public class GenresApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<GenreDto>> Create([FromBody] GenreUpsertDto model)
     {
         var genre = await _repository.CreateAsync(new Genre
@@ -47,6 +55,7 @@ public class GenresApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<GenreDto>> Update(int id, [FromBody] GenreUpsertDto model)
     {
         var genre = await _repository.GetByIdAsync(id);
@@ -64,6 +73,7 @@ public class GenresApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);

@@ -1,6 +1,7 @@
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
@@ -42,6 +43,7 @@ public class ReviewsApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<ReviewDto>> Create([FromBody] ReviewUpsertDto model)
     {
         var review = await _reviewRepository.CreateAsync(new Review
@@ -61,6 +63,7 @@ public class ReviewsApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<ReviewDto>> Update(int id, [FromBody] ReviewUpsertDto model)
     {
         var review = await _reviewRepository.GetByIdAsync(id);
@@ -84,6 +87,7 @@ public class ReviewsApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _reviewRepository.DeleteAsync(id);

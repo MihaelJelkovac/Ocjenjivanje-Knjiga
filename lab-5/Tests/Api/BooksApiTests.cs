@@ -6,11 +6,11 @@ using Xunit;
 
 namespace Lab5.Tests.Api;
 
-public class BooksApiTests : IClassFixture<Lab5ApiFactory>
+public class BooksApiTests : IClassFixture<Lab5TestFactory>
 {
     private readonly HttpClient _client;
 
-    public BooksApiTests(Lab5ApiFactory factory)
+    public BooksApiTests(Lab5TestFactory factory)
     {
         _client = factory.CreateClient();
     }

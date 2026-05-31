@@ -146,8 +146,11 @@ public class GenresController : Controller
     [Route("search")]
     public async Task<IActionResult> Search(string query)
     {
-        var results = await _repository.SearchAsync(query ?? string.Empty);
-        return Json(results.Select(g => new { id = g.Id, text = g.Name }));
+        var results = await _repository.GetAllAsync();
+        return Json(results
+            .Where(g => g.Name.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+            .Take(50)
+            .Select(g => new { id = g.Id, text = g.Name }));
     }
 }
 

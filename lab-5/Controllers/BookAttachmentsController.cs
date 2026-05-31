@@ -1,5 +1,6 @@
 using Lab5.Data;
 using Lab5.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,7 @@ public class BookAttachmentsController : Controller
     }
 
     [HttpPost("Upload/{bookId:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Upload(int bookId, IFormFile file)
     {
         var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == bookId && b.DeletedAt == null);
@@ -69,6 +71,7 @@ public class BookAttachmentsController : Controller
     }
 
     [HttpPost("Delete/{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.Id == id);

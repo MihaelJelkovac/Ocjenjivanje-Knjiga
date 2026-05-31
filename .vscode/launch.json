@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Lab 4: Launch (HTTPS)",
+            "name": "Lab 5: Launch (HTTPS)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build lab-4",
-            "program": "${workspaceFolder}/lab-4/bin/Debug/net9.0/Lab4.dll",
+            "preLaunchTask": "build lab-5",
+            "program": "${workspaceFolder}/lab-5/bin/Debug/net9.0/Lab5.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/lab-4",
+            "cwd": "${workspaceFolder}/lab-5",
             "stopAtEntry": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",

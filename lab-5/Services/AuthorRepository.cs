@@ -60,15 +60,5 @@ public class AuthorRepository : IAuthorRepository
         await _context.SaveChangesAsync();
         return true;
     }
-
-    public async Task<IReadOnlyList<Author>> SearchAsync(string query)
-    {
-        var queryLower = query.ToLower();
-        return await _context.Authors
-            .Where(a => a.DeletedAt == null &&
-                (a.FirstName.ToLower().Contains(queryLower) || a.LastName.ToLower().Contains(queryLower)))
-            .Take(20)
-            .ToListAsync();
-    }
 }
 

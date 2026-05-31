@@ -1,6 +1,7 @@
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
@@ -19,9 +20,15 @@ public class PublishersApiController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PublisherDto>>> GetAll([FromQuery] string? query = null)
     {
-        var publishers = string.IsNullOrWhiteSpace(query)
-            ? await _repository.GetAllAsync()
-            : await _repository.SearchAsync(query);
+        var publishers = await _repository.GetAllAsync();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var normalized = query.Trim();
+            publishers = publishers.Where(p =>
+                p.Name.Contains(normalized, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         return Ok(publishers.Select(ApiDtoMapper.ToDto));
     }
@@ -34,6 +41,7 @@ public class PublishersApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<PublisherDto>> Create([FromBody] PublisherUpsertDto model)
     {
         var publisher = await _repository.CreateAsync(new Publisher
@@ -50,6 +58,7 @@ public class PublishersApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<PublisherDto>> Update(int id, [FromBody] PublisherUpsertDto model)
     {
         var publisher = await _repository.GetByIdAsync(id);
@@ -70,6 +79,7 @@ public class PublishersApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);

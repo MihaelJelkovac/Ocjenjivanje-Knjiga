@@ -13,7 +13,5 @@ public interface IGenreRepository
     Task<bool> UpdateAsync(Genre genre);
 
     Task<bool> DeleteAsync(int id);
-
-    Task<IReadOnlyList<Genre>> SearchAsync(string query);
 }
 

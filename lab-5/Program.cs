@@ -23,25 +23,21 @@ builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CatalogDbContext")));
 
 builder.Services
+    .AddAuthentication()
+    .AddGoogle(options =>
+    {
+        var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+        options.ClientId = googleAuthSection["ClientId"]!;
+        options.ClientSecret = googleAuthSection["ClientSecret"]!;
+    });
+
+builder.Services
     .AddDefaultIdentity<AppUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<CatalogDbContext>();
-
-var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
-if (googleAuthSection.Exists() &&
-    !string.IsNullOrWhiteSpace(googleAuthSection["ClientId"]) &&
-    !string.IsNullOrWhiteSpace(googleAuthSection["ClientSecret"]))
-{
-    builder.Services.AddAuthentication()
-        .AddGoogle(options =>
-        {
-            options.ClientId = googleAuthSection["ClientId"]!;
-            options.ClientSecret = googleAuthSection["ClientSecret"]!;
-        });
-}
 
 // Register repositories
 builder.Services.AddScoped<IBookCatalogService, BookCatalogService>();

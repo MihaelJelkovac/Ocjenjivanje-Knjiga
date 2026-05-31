@@ -5,11 +5,11 @@ using Xunit;
 
 namespace Lab5.Tests.Api;
 
-public class AuthorsApiTests : IClassFixture<Lab5ApiFactory>
+public class AuthorsApiTests : IClassFixture<Lab5TestFactory>
 {
     private readonly HttpClient _client;
 
-    public AuthorsApiTests(Lab5ApiFactory factory)
+    public AuthorsApiTests(Lab5TestFactory factory)
     {
         _client = factory.CreateClient();
     }

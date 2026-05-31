@@ -61,14 +61,5 @@ public class GenreRepository : IGenreRepository
         await _context.SaveChangesAsync();
         return true;
     }
-
-    public async Task<IReadOnlyList<Genre>> SearchAsync(string query)
-    {
-        var queryLower = query.ToLower();
-        return await _context.Genres
-            .Where(g => g.DeletedAt == null && g.Name.ToLower().Contains(queryLower))
-            .Take(20)
-            .ToListAsync();
-    }
 }
 
