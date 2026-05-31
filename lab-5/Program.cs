@@ -27,8 +27,16 @@ builder.Services
     .AddGoogle(options =>
     {
         var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
-        options.ClientId = googleAuthSection["ClientId"]!;
-        options.ClientSecret = googleAuthSection["ClientSecret"]!;
+        var clientId = googleAuthSection["ClientId"];
+        var clientSecret = googleAuthSection["ClientSecret"];
+
+        // Only configure Google if credentials are provided (skip in test environment)
+        if (!string.IsNullOrEmpty(clientId) && !clientId.Contains("YOUR_") &&
+            !string.IsNullOrEmpty(clientSecret) && !clientSecret.Contains("YOUR_"))
+        {
+            options.ClientId = clientId;
+            options.ClientSecret = clientSecret;
+        }
     });
 
 builder.Services

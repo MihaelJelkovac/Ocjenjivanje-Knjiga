@@ -20,7 +20,10 @@ public class Lab5ApiFactory : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:CatalogDbContext"] = $"Data Source={_databasePath}"
+                ["ConnectionStrings:CatalogDbContext"] = $"Data Source={_databasePath}",
+                // Skip Google auth in tests by providing dummy values that trigger the placeholder check
+                ["Authentication:Google:ClientId"] = "test-client-id-skip",
+                ["Authentication:Google:ClientSecret"] = "test-client-secret-skip"
             });
         });
     }

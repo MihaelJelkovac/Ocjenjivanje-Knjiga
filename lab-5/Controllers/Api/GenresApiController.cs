@@ -1,14 +1,14 @@
+using Lab5.Authorization;
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
 
 [ApiController]
 [Route("api/genres")]
-public class GenresApiController : ControllerBase
+public class GenresApiController : BaseApiController
 {
     private readonly IGenreRepository _repository;
 
@@ -21,16 +21,8 @@ public class GenresApiController : ControllerBase
     public async Task<ActionResult<IEnumerable<GenreDto>>> GetAll([FromQuery] string? query = null)
     {
         var genres = await _repository.GetAllAsync();
-
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var normalized = query.Trim();
-            genres = genres.Where(g =>
-                g.Name.Contains(normalized, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        return Ok(genres.Select(ApiDtoMapper.ToDto));
+        var filtered = ApplyQueryFilter(genres, query, g => new[] { g.Name });
+        return Ok(filtered.Select(ApiDtoMapper.ToDto));
     }
 
     [HttpGet("{id:int}")]
@@ -41,7 +33,7 @@ public class GenresApiController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager")]
+    [AuthorizeAdminManager]
     public async Task<ActionResult<GenreDto>> Create([FromBody] GenreUpsertDto model)
     {
         var genre = await _repository.CreateAsync(new Genre
@@ -55,14 +47,11 @@ public class GenresApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [AuthorizeAdminManager]
     public async Task<ActionResult<GenreDto>> Update(int id, [FromBody] GenreUpsertDto model)
     {
         var genre = await _repository.GetByIdAsync(id);
-        if (genre is null)
-        {
-            return NotFound();
-        }
+        if (genre is null) return NotFound();
 
         genre.Name = model.Name;
         genre.Description = model.Description;
@@ -73,7 +62,7 @@ public class GenresApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [AuthorizeAdmin]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);

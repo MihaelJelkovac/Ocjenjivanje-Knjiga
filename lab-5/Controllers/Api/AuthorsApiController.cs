@@ -1,14 +1,14 @@
+using Lab5.Authorization;
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
 
 [ApiController]
 [Route("api/authors")]
-public class AuthorsApiController : ControllerBase
+public class AuthorsApiController : BaseApiController
 {
     private readonly IAuthorRepository _repository;
 
@@ -21,17 +21,9 @@ public class AuthorsApiController : ControllerBase
     public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAll([FromQuery] string? query = null)
     {
         var authors = await _repository.GetAllAsync();
-
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var normalized = query.Trim();
-            authors = authors.Where(a =>
-                a.FirstName.Contains(normalized, StringComparison.OrdinalIgnoreCase) ||
-                a.LastName.Contains(normalized, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        return Ok(authors.Select(ApiDtoMapper.ToDto));
+        var filtered = ApplyQueryFilter(authors, query,
+            a => new[] { a.FirstName, a.LastName });
+        return Ok(filtered.Select(ApiDtoMapper.ToDto));
     }
 
     [HttpGet("{id:int}")]
@@ -42,7 +34,7 @@ public class AuthorsApiController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager")]
+    [AuthorizeAdminManager]
     public async Task<ActionResult<AuthorDto>> Create([FromBody] AuthorUpsertDto model)
     {
         var author = await _repository.CreateAsync(new Author
@@ -59,14 +51,11 @@ public class AuthorsApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [AuthorizeAdminManager]
     public async Task<ActionResult<AuthorDto>> Update(int id, [FromBody] AuthorUpsertDto model)
     {
         var author = await _repository.GetByIdAsync(id);
-        if (author is null)
-        {
-            return NotFound();
-        }
+        if (author is null) return NotFound();
 
         author.FirstName = model.FirstName;
         author.LastName = model.LastName;
@@ -80,7 +69,7 @@ public class AuthorsApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [AuthorizeAdmin]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);

@@ -1,14 +1,14 @@
+using Lab5.Authorization;
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
 
 [ApiController]
 [Route("api/books")]
-public class BooksApiController : ControllerBase
+public class BooksApiController : BaseApiController
 {
     private readonly IBookRepository _bookRepository;
 
@@ -22,19 +22,16 @@ public class BooksApiController : ControllerBase
     {
         var books = await _bookRepository.GetAllAsync();
 
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var normalized = query.Trim();
-            books = books.Where(book =>
-                book.Title.Contains(normalized, StringComparison.OrdinalIgnoreCase) ||
-                (book.Author != null && (
-                    book.Author.FirstName.Contains(normalized, StringComparison.OrdinalIgnoreCase) ||
-                    book.Author.LastName.Contains(normalized, StringComparison.OrdinalIgnoreCase))) ||
-                (book.Publisher != null && book.Publisher.Name.Contains(normalized, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
-        }
+        // Filter books by title, author names, or publisher name
+        var filtered = ApplyQueryFilter(books, query,
+            b => new[] {
+                b.Title,
+                b.Author?.FirstName ?? "",
+                b.Author?.LastName ?? "",
+                b.Publisher?.Name ?? ""
+            }.Where(s => !string.IsNullOrEmpty(s)).ToArray());
 
-        return Ok(books.Select(ApiDtoMapper.ToDto));
+        return Ok(filtered.Select(ApiDtoMapper.ToDto));
     }
 
     [HttpGet("{id:int}")]
@@ -45,7 +42,7 @@ public class BooksApiController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager")]
+    [AuthorizeAdminManager]
     public async Task<ActionResult<BookDto>> Create([FromBody] BookUpsertDto model)
     {
         var book = await _bookRepository.CreateAsync(new Book
@@ -61,20 +58,17 @@ public class BooksApiController : ControllerBase
             PublisherId = model.PublisherId
         });
 
-        var created = await _bookRepository.GetByIdAsync(book.Id);
-        return CreatedAtAction(nameof(GetById), new { id = book.Id }, ApiDtoMapper.ToDto(created ?? book));
+        return CreatedAtAction(nameof(GetById), new { id = book.Id }, ApiDtoMapper.ToDto(book));
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [AuthorizeAdminManager]
     public async Task<ActionResult<BookDto>> Update(int id, [FromBody] BookUpsertDto model)
     {
         var book = await _bookRepository.GetByIdAsync(id);
-        if (book is null)
-        {
-            return NotFound();
-        }
+        if (book is null) return NotFound();
 
+        // Update only allowed fields
         book.Title = model.Title;
         book.Isbn = model.Isbn;
         book.Description = model.Description;
@@ -86,12 +80,11 @@ public class BooksApiController : ControllerBase
         book.PublisherId = model.PublisherId;
 
         await _bookRepository.UpdateAsync(book);
-        var updated = await _bookRepository.GetByIdAsync(book.Id);
-        return Ok(ApiDtoMapper.ToDto(updated ?? book));
+        return Ok(ApiDtoMapper.ToDto(book));
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
+    [AuthorizeAdmin]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _bookRepository.DeleteAsync(id);
