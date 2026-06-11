@@ -1,6 +1,7 @@
 using Lab5.Models;
 using Lab5.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -14,17 +15,23 @@ public class BooksController : Controller
     private readonly IAuthorRepository _authorRepository;
     private readonly IPublisherRepository _publisherRepository;
     private readonly IGenreRepository _genreRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly UserManager<AppUser> _userManager;
 
     public BooksController(
         IBookRepository bookRepository,
         IAuthorRepository authorRepository,
         IPublisherRepository publisherRepository,
-        IGenreRepository genreRepository)
+        IGenreRepository genreRepository,
+        IHttpContextAccessor httpContextAccessor,
+        UserManager<AppUser> userManager)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
         _publisherRepository = publisherRepository;
         _genreRepository = genreRepository;
+        _httpContextAccessor = httpContextAccessor;
+        _userManager = userManager;
     }
 
     [AllowAnonymous]
@@ -32,7 +39,8 @@ public class BooksController : Controller
     [Route("index")]
     public async Task<IActionResult> Index()
     {
-        var books = await _bookRepository.GetAllAsync();
+        var currentUser = await _userManager.GetUserAsync(User);
+        var books = await _bookRepository.GetAllAsyncForUserAsync(currentUser?.Id);
         return View(books);
     }
 
@@ -41,7 +49,8 @@ public class BooksController : Controller
     [Route("detalji/{id:int}")]
     public async Task<IActionResult> Details(int id)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
+        var currentUser = await _userManager.GetUserAsync(User);
+        var book = await _bookRepository.GetByIdForUserAsync(id, currentUser?.Id);
         if (book is null)
         {
             return NotFound();

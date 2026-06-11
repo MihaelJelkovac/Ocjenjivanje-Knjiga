@@ -14,6 +14,7 @@ CultureInfo.DefaultThreadCurrentUICulture = croatianCulture;
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
 
 // Register memory cache
 builder.Services.AddMemoryCache();
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBookAccessService, BookAccessService>();
 
 var app = builder.Build();
 

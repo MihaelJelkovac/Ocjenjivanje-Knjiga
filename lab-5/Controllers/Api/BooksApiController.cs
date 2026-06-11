@@ -2,6 +2,7 @@ using Lab5.Authorization;
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
@@ -11,16 +12,19 @@ namespace Lab5.Controllers.Api;
 public class BooksApiController : BaseApiController
 {
     private readonly IBookRepository _bookRepository;
+    private readonly UserManager<AppUser> _userManager;
 
-    public BooksApiController(IBookRepository bookRepository)
+    public BooksApiController(IBookRepository bookRepository, UserManager<AppUser> userManager)
     {
         _bookRepository = bookRepository;
+        _userManager = userManager;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BookDto>>> GetAll([FromQuery] string? query = null)
     {
-        var books = await _bookRepository.GetAllAsync();
+        var currentUser = await _userManager.GetUserAsync(User);
+        var books = await _bookRepository.GetAllAsyncForUserAsync(currentUser?.Id);
 
         // Filter books by title, author names, or publisher name
         var filtered = ApplyQueryFilter(books, query,
@@ -37,7 +41,8 @@ public class BooksApiController : BaseApiController
     [HttpGet("{id:int}")]
     public async Task<ActionResult<BookDto>> GetById(int id)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
+        var currentUser = await _userManager.GetUserAsync(User);
+        var book = await _bookRepository.GetByIdForUserAsync(id, currentUser?.Id);
         return book is null ? NotFound() : Ok(ApiDtoMapper.ToDto(book));
     }
 

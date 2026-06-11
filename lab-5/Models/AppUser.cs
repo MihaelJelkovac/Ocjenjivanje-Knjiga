@@ -14,4 +14,9 @@ public class AppUser : IdentityUser
     [StringLength(13, MinimumLength = 13)]
     [RegularExpression(@"^[0-9]*$")]
     public string JMBG { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Dozvole za pristup knjigama
+    /// </summary>
+    public virtual ICollection<BookAccess> BookAccesses { get; set; } = new List<BookAccess>();
 }

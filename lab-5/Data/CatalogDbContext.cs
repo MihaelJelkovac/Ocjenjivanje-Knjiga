@@ -19,6 +19,7 @@ public class CatalogDbContext : IdentityDbContext<AppUser>
     public new DbSet<User> Users { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
     public DbSet<BookGenre> BookGenres { get; set; }
+    public DbSet<BookAccess> BookAccesses { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -51,6 +52,30 @@ public class CatalogDbContext : IdentityDbContext<AppUser>
             .WithMany(b => b.Attachments)
             .HasForeignKey(a => a.BookId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure BookAccess relationships  
+        // Primary relationship: AppUserId -> AppUser.Id (cascade delete)
+        modelBuilder.Entity<BookAccess>()
+            .HasOne(ba => ba.User)
+            .WithMany()
+            .HasForeignKey(ba => ba.AppUserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Book relationship: BookId -> Book.Id (cascade delete)
+        modelBuilder.Entity<BookAccess>()
+            .HasOne(ba => ba.Book)
+            .WithMany()
+            .HasForeignKey(ba => ba.BookId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // GrantedBy relationship: GrantedBy -> AppUser.Id (set null on delete)
+        modelBuilder.Entity<BookAccess>()
+            .HasOne<AppUser>()
+            .WithMany()
+            .HasForeignKey(ba => ba.GrantedBy)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Seed initial data
         SeedData(modelBuilder);
