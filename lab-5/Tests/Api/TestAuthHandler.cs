@@ -15,10 +15,19 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var claims = new[] {
+        // Allow tests to override role via request header `X-Auth-Role` (comma-separated)
+        var role = "Admin"; // default role
+        if (Request.Headers.TryGetValue("X-Auth-Role", out var headerValues))
+        {
+            var first = headerValues.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(first)) role = first.Split(',')[0].Trim();
+        }
+
+        var claims = new List<Claim>
+        {
             new Claim(ClaimTypes.Name, "testuser"),
             new Claim(ClaimTypes.NameIdentifier, "1"),
-            new Claim(ClaimTypes.Role, "Admin")
+            new Claim(ClaimTypes.Role, role)
         };
 
         var identity = new ClaimsIdentity(claims, "Test");
