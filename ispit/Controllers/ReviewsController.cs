@@ -1,6 +1,7 @@
 using Lab5.Models;
 using Lab5.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -13,15 +14,24 @@ public class ReviewsController : Controller
     private readonly IReviewRepository _reviewRepository;
     private readonly IBookRepository _bookRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IAIService _aiService;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<ReviewsController> _logger;
 
     public ReviewsController(
         IReviewRepository reviewRepository,
         IBookRepository bookRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IAIService aiService,
+        UserManager<AppUser> userManager,
+        ILogger<ReviewsController> logger)
     {
         _reviewRepository = reviewRepository;
         _bookRepository = bookRepository;
         _userRepository = userRepository;
+        _aiService = aiService;
+        _userManager = userManager;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -198,5 +208,92 @@ public class ReviewsController : Controller
             .Take(50)
             .Select(r => new { id = r.Id, text = r.Title }));
     }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("create-from-ai")]
+    public async Task<IActionResult> CreateFromAI([FromBody] AIPromptRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("🤖 Primljen AI prompt: {Prompt}", request.Prompt);
+
+            if (string.IsNullOrWhiteSpace(request.Prompt))
+                return BadRequest(new { error = "Prompt ne može biti prazan" });
+
+            // 1. AI parsira prompt
+            var reviewData = await _aiService.ExtractReviewFromPromptAsync(request.Prompt);
+
+            // 2. Pronađi knjiga
+            var books = await _bookRepository.GetAllAsync();
+            var book = books.FirstOrDefault(b =>
+                b.Title.Contains(reviewData.BookTitle, StringComparison.OrdinalIgnoreCase));
+
+            if (book == null)
+            {
+                _logger.LogWarning("⚠️ Knjiga nije pronađena: {BookTitle}", reviewData.BookTitle);
+                return BadRequest(new
+                {
+                    error = $"Knjiga '{reviewData.BookTitle}' nije pronađena",
+                    suggestion = "Dostupne knjige: Harry Potter, A Game of Thrones, The Fellowship of the Ring"
+                });
+            }
+
+            // 3. Pronađi korisnika ili koristi default-a
+            var users = await _userRepository.GetAllAsync();
+            var defaultUser = users.FirstOrDefault();
+            int userId = defaultUser?.Id ?? 1;
+
+            if (defaultUser == null)
+            {
+                _logger.LogWarning("⚠️ Nema dostupnih korisnika za recenziju");
+                return BadRequest(new { error = "Trebate biti ulogirani ili korisnik mora postojati" });
+            }
+
+            // 4. Kreiraj recenziju
+            var review = new Review
+            {
+                BookId = book.Id,
+                UserId = userId,
+                Score = reviewData.Score,
+                Comment = reviewData.Comment,
+                IsRecommended = reviewData.IsRecommended,
+                Title = reviewData.Comment.Length > 50
+                    ? reviewData.Comment.Substring(0, 47) + "..."
+                    : reviewData.Comment,
+                Sentiment = Enum.Parse<ReviewSentiment>(reviewData.Sentiment, ignoreCase: true),
+                ReviewedAt = DateTime.UtcNow
+            };
+
+            await _reviewRepository.CreateAsync(review);
+
+            _logger.LogInformation("✅ Recenzija kreirana kroz AI: {BookTitle}, Score: {Score}",
+                book.Title, reviewData.Score);
+
+            return Ok(new
+            {
+                success = true,
+                reviewId = review.Id,
+                message = $"✅ Recenzija kreirana za '{book.Title}'",
+                review = new
+                {
+                    bookTitle = book.Title,
+                    score = review.Score,
+                    comment = review.Comment,
+                    sentiment = review.Sentiment.ToString()
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Greška pri AI kreiranju recenzije");
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+}
+
+public class AIPromptRequest
+{
+    public string Prompt { get; set; } = string.Empty;
 }
 

@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Kreiraj Recenziju - AI";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>🤖 Kreiraj Recenziju putem AI-a</h2>
+            <p class="text-muted">Napiši što misliš o knjizi, AI će automatski parsirati ocjenu i sentimen.</p>
+
+            <form id="aiForm">
+                <div class="form-group mb-3">
+                    <label for="prompt" class="form-label">Što misliš o knjizi?</label>
+                    <textarea
+                        class="form-control"
+                        id="prompt"
+                        rows="5"
+                        placeholder="Primjer: Harry Potter je odličan! Preporuka da, ocjena 5, fantasy je super!"></textarea>
+                    <small class="text-muted">Dostupne knjige za testiranje: Harry Potter, A Game of Thrones, The Fellowship of the Ring</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">🚀 Kreiraj putem AI-a</button>
+            </form>
+
+            <div id="result" class="mt-4"></div>
+
+            <hr class="my-5" />
+
+            <h4>📝 Primjeri kako napisati:</h4>
+            <ul>
+                <li><code>"Harry Potter je fantastičan! Ocjena 5, preporuka da"</code></li>
+                <li><code>"A Game of Thrones je dobar ali malo dugačak, ocjena 4"</code></li>
+                <li><code>"The Fellowship of the Ring - ne sviđa mi se, ocjena 2"</code></li>
+                <li><code>"Hobbit - super knjiga, odličan fantasy, 5 zvjezdica!"</code></li>
+            </ul>
+
+            <h4 class="mt-4">🔧 Što radi:</h4>
+            <ul>
+                <li>✅ Ekstrahira naziv knjige iz teksta</li>
+                <li>✅ Ekstrahira ocjenu (1-5 ili "odličan" → 5)</li>
+                <li>✅ Ekstrahira sentiment (Positive, Negative, Neutral, Enthusiastic)</li>
+                <li>✅ Pravi preporuku (ako je ocjena viša ili kaže "preporuka")</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('aiForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const prompt = document.getElementById('prompt').value;
+    const resultDiv = document.getElementById('result');
+
+    resultDiv.innerHTML = '⏳ Čekam AI odgovor...';
+
+    try {
+        const response = await fetch('/reviews/create-from-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompt })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>✅ ${data.message}</h5>
+                    <hr />
+                    <p><strong>Knjiga:</strong> ${data.review.bookTitle}</p>
+                    <p><strong>Ocjena:</strong> ${data.review.score}/5 ${'⭐'.repeat(data.review.score)}</p>
+                    <p><strong>Sentiment:</strong> ${data.review.sentiment}</p>
+                    <p><strong>Komentar:</strong> ${data.review.comment}</p>
+                    <hr />
+                    <small class="text-success">✅ Recenzija ID: ${data.reviewId}</small>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h5>❌ Greška</h5>
+                    <p><strong>Greška:</strong> ${data.error}</p>
+                    ${data.suggestion ? `<p><strong>Prijedlog:</strong> ${data.suggestion}</p>` : ''}
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<div class="alert alert-danger">❌ Greška: ${error.message}</div>`;
+    }
+});
+</script>
+
+<style>
+    code {
+        background-color: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+    }
+</style>
