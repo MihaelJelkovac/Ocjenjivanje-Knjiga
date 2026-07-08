@@ -210,9 +210,17 @@ public class ReviewsController : Controller
     }
 
     [AllowAnonymous]
+    [HttpGet]
+    [Route("create-from-ai")]
+    public IActionResult CreateFromAI()
+    {
+        return View();
+    }
+
+    [AllowAnonymous]
     [HttpPost]
     [Route("create-from-ai")]
-    public async Task<IActionResult> CreateFromAI([FromBody] AIPromptRequest request)
+    public async Task<IActionResult> CreateFromAIPost([FromBody] AIPromptRequest request)
     {
         try
         {
