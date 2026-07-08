@@ -10,16 +10,18 @@
     </ol>
 </nav>
 
-<section class="panel-card">
+<section class="panel-card reviews-index-hero mb-4" aria-labelledby="reviews-index-heading">
     <div class="panel-header">
         <div>
-            <div class="btn-group-reviews">
-                <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
-                <a class="btn btn-outline-primary" asp-action="CreateFromAI">🤖 AI Recenzija</a>
-            </div>
-            <h2>Recenzije knjiga</h2>
+            <p class="section-label">Index</p>
+            <h2 id="reviews-index-heading">Recenzije knjiga</h2>
+            <p class="panel-note mb-0">Pregledaj sve recenzije, ocjene i dojmove korisnika.</p>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
+        <div class="btn-group-reviews">
+            <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
+            <a class="btn btn-outline-primary" asp-action="CreateFromAI">🤖 AI Recenzija</a>
+        </div>
     </div>
 
     <!-- Search Form -->
