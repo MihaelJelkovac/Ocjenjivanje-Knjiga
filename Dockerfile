@@ -40,3 +40,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Start the application
 ENTRYPOINT ["dotnet", "Lab5.dll"]
+
