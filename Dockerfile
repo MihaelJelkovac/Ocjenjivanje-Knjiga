@@ -27,8 +27,8 @@ WORKDIR /app
 # Copy published application
 COPY --from=publish /app/publish .
 
-# Create Logs directory for Serilog
-RUN mkdir -p Logs
+# Create data directory for SQLite database
+RUN mkdir -p /app/data
 
 # Expose port
 EXPOSE 80
