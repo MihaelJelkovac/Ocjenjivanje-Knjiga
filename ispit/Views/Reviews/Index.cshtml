@@ -13,8 +13,9 @@
 <section class="panel-card">
     <div class="panel-header">
         <div>
-            <div>
+            <div class="btn-group-reviews">
                 <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
+                <a class="btn btn-outline-primary" asp-action="CreateFromAI">🤖 AI Recenzija</a>
             </div>
             <h2>Recenzije knjiga</h2>
         </div>
@@ -59,3 +60,25 @@
             </table>
         </div>
     </section>
+
+<style>
+    .btn-group-reviews {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-group-reviews .btn {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 576px) {
+        .btn-group-reviews {
+            flex-direction: column;
+        }
+
+        .btn-group-reviews .btn {
+            width: 100%;
+        }
+    }
+</style>
