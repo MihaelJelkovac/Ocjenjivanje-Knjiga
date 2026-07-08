@@ -5,7 +5,6 @@ WORKDIR /app
 
 # Copy project files
 COPY ["ispit/Lab5.csproj", "ispit/"]
-COPY ["ispit.Tests/Lab5Tests.csproj", "ispit.Tests/"]
 
 # Restore dependencies
 RUN dotnet restore "ispit/Lab5.csproj"
