@@ -1,0 +1,5 @@
+@model Review
+@{ ViewData["Title"] = Model?.Id > 0 ? "Ažuriranje Recenzije" : "Dodaj Recenziju"; }
+<div class="container mt-4">
+    <partial name="_CreateOrEdit" model="Model" />
+</div>

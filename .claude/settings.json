@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"[Console]::In.ReadToEnd() | Add-Content -Path '.github\\hooks\\agent_log.txt'\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"[Console]::In.ReadToEnd() | Add-Content -Path '.github\\hooks\\agent_log.txt'\""
+          }
+        ]
+      }
+    ]
+  }
+}

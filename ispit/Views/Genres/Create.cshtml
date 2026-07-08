@@ -1,0 +1,5 @@
+@model Genre
+@{ ViewData["Title"] = Model?.Id > 0 ? "Ažuriranje Žanra" : "Dodaj Žanr"; }
+<div class="container mt-4">
+    <partial name="_CreateOrEdit" model="Model" />
+</div>

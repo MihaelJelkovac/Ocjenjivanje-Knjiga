@@ -1,0 +1,167 @@
+@model Book
+
+<div class="form-container">
+    @if (Model?.Id > 0)
+    {
+        <h2>Ažuriranje Knjige</h2>
+    }
+    else
+    {
+        <h2>Dodaj Novu Knjigu</h2>
+    }
+
+    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" 
+          method="post" 
+          class="needs-validation"
+          novalidate>
+        
+        @if (Model?.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <div class="form-group mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Isbn" class="form-label"></label>
+            <input asp-for="Isbn" class="form-control" />
+            <span asp-validation-for="Isbn" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="PublishedOn" class="form-label">Datum Objavljivanja</label>
+            @{
+                ViewBag.FieldName = "PublishedOn";
+                ViewBag.Value = Model?.PublishedOn;
+            }
+            <partial name="_DateTimeControl" />
+            <span asp-validation-for="PublishedOn" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="PageCount" class="form-label"></label>
+            <input asp-for="PageCount" class="form-control" type="number" />
+            <span asp-validation-for="PageCount" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Language" class="form-label"></label>
+            <input asp-for="Language" class="form-control" />
+            <span asp-validation-for="Language" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Status" class="form-label"></label>
+            <select asp-for="Status" asp-items="ViewBag.Statuses" class="form-select"></select>
+            <span asp-validation-for="Status" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="AuthorId-search" class="form-label">Autor</label>
+            @{ 
+                ViewBag.FieldName = "AuthorId";
+                ViewBag.DisplayText = Model?.Author?.FirstName + " " + Model?.Author?.LastName;
+                ViewBag.ValueId = Model?.AuthorId;
+                ViewBag.Placeholder = "Pretraži autore...";
+                ViewBag.SearchUrl = "/Authors/Search";
+            }
+            <partial name="_AutocompleteDropdown" />
+            <span asp-validation-for="AuthorId" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="PublisherId-search" class="form-label">Izdavač</label>
+            @{ 
+                ViewBag.FieldName = "PublisherId";
+                ViewBag.DisplayText = Model?.Publisher?.Name;
+                ViewBag.ValueId = Model?.PublisherId;
+                ViewBag.Placeholder = "Pretraži izdavače...";
+                ViewBag.SearchUrl = "/Publishers/Search";
+            }
+            <partial name="_AutocompleteDropdown" />
+            <span asp-validation-for="PublisherId" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Spremi</button>
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        </div>
+    </form>
+
+    @if (Model?.Id > 0)
+    {
+        <hr />
+        <div class="mt-4">
+            <h3>Prilozi</h3>
+
+            <div class="input-group mb-3">
+                <input type="file" class="form-control js-attachment-file" />
+                <button type="button" class="btn btn-outline-primary js-upload-attachment" data-book-id="@Model.Id">Učitaj</button>
+            </div>
+
+            <div id="attachment-list" data-book-id="@Model.Id"></div>
+        </div>
+
+        <script>
+            (function () {
+                const container = document.getElementById('attachment-list');
+                const bookId = container.dataset.bookId;
+
+                async function refreshAttachments() {
+                    const response = await fetch(`/Books/Attachments/${bookId}`);
+                    container.innerHTML = await response.text();
+                }
+
+                async function uploadAttachment() {
+                    const fileInput = document.querySelector('.js-attachment-file');
+                    if (!fileInput.files.length) {
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+
+                    const response = await fetch(`/Books/Attachments/Upload/${bookId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        fileInput.value = '';
+                        await refreshAttachments();
+                    }
+                }
+
+                document.querySelector('.js-upload-attachment')?.addEventListener('click', uploadAttachment);
+                container.addEventListener('click', async function (event) {
+                    const button = event.target.closest('.js-delete-attachment');
+                    if (!button) {
+                        return;
+                    }
+
+                    const attachmentId = button.dataset.id;
+                    const response = await fetch(`/Books/Attachments/Delete/${attachmentId}`, { method: 'POST' });
+                    if (response.ok) {
+                        await refreshAttachments();
+                    }
+                });
+
+                refreshAttachments();
+            })();
+        </script>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,41 @@
+@{
+    string fieldName = ViewBag.FieldName ?? "dateTime";
+    DateTime? value = ViewBag.Value as DateTime?;
+    string dateFormat = "dd.MM.yyyy";
+    string timeFormat = "HH:mm";
+    bool showTime = ViewBag.ShowTime == null || System.Convert.ToBoolean(ViewBag.ShowTime);
+}
+
+<div class="datetime-control">
+    <div class="row g-2">
+        <div class="@(showTime ? "col-md-6" : "col-12")">
+            <input type="text" id="@fieldName-date" class="form-control datetime-input" placeholder="@dateFormat"
+                   value="@(value?.ToString(dateFormat) ?? "")" data-date-format="@dateFormat"
+                   data-field-name="@fieldName" />
+        </div>
+        @if (showTime)
+        {
+            <div class="col-md-6">
+                <input type="text" id="@fieldName-time" class="form-control datetime-input" placeholder="@timeFormat"
+                       value="@(value?.ToString(timeFormat) ?? "")" data-time-format="@timeFormat"
+                       data-field-name="@fieldName" />
+            </div>
+        }
+    </div>
+    <input type="hidden" id="@fieldName-combined" name="@fieldName" value="@(value?.ToString("o") ?? "")" />
+</div>
+
+<style>
+    .datetime-control {
+        width: 100%;
+    }
+
+    .datetime-input.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+    }
+</style>

@@ -1,0 +1,78 @@
+@model Review
+
+<div class="form-container">
+    @if (Model?.Id > 0)
+    {
+        <h2>Ažuriranje Recenzije</h2>
+    }
+    else
+    {
+        <h2>Dodaj Novu Recenziju</h2>
+    }
+
+    <form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")" method="post" class="needs-validation" novalidate>
+        @if (Model?.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <div class="form-group mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Score" class="form-label"></label>
+            <input asp-for="Score" class="form-control" type="number" />
+            <span asp-validation-for="Score" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Comment" class="form-label"></label>
+            <textarea asp-for="Comment" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Comment" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="ReviewedAt" class="form-label">Datum Recenzije</label>
+            @{ ViewBag.FieldName = "ReviewedAt"; ViewBag.Value = Model?.ReviewedAt; }
+            <partial name="_DateTimeControl" />
+            <span asp-validation-for="ReviewedAt" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="IsRecommended" class="form-label">Preporučujem</label>
+            <input asp-for="IsRecommended" class="form-check-input" type="checkbox" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Sentiment" class="form-label"></label>
+            <select asp-for="Sentiment" asp-items="ViewBag.Sentiments" class="form-select"></select>
+            <span asp-validation-for="Sentiment" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="BookId-search" class="form-label">Knjiga</label>
+            @{ ViewBag.FieldName = "BookId"; ViewBag.DisplayText = Model?.Book?.Title; ViewBag.ValueId = Model?.BookId; ViewBag.Placeholder = "Pretraži knjige..."; ViewBag.SearchUrl = "/Books/Search"; }
+            <partial name="_AutocompleteDropdown" />
+            <span asp-validation-for="BookId" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="UserId-search" class="form-label">Korisnik</label>
+            @{ ViewBag.FieldName = "UserId"; ViewBag.DisplayText = Model?.User?.FullName; ViewBag.ValueId = Model?.UserId; ViewBag.Placeholder = "Pretraži korisnike..."; ViewBag.SearchUrl = "/Users/Search"; }
+            <partial name="_AutocompleteDropdown" />
+            <span asp-validation-for="UserId" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Spremi</button>
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

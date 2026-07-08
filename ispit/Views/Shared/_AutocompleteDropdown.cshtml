@@ -1,0 +1,62 @@
+@{
+    string fieldName = ViewBag.FieldName ?? "id";
+    string displayText = ViewBag.DisplayText ?? "Display";
+    string placeholder = ViewBag.Placeholder ?? "Počni pisati...";
+    string searchUrl = ViewBag.SearchUrl ?? "/api/search";
+}
+
+<div class="autocomplete-wrapper">
+    <input type="text" id="@fieldName-search" name="@($"{fieldName}-search")" class="form-control autocomplete-input"
+           placeholder="@placeholder" data-search-url="@searchUrl" data-field-name="@fieldName"
+           data-display-text="@displayText" value="@displayText" />
+
+    <input type="hidden" id="@fieldName-id" name="@fieldName" value="@(ViewBag.ValueId?.ToString() ?? "")" />
+
+    <ul class="autocomplete-results" id="@fieldName-results" style="display: none;">
+        <!-- Rezultati će biti dinamički dodani JavaScript-om -->
+    </ul>
+</div>
+
+<style>
+    .autocomplete-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .autocomplete-input {
+        width: 100%;
+    }
+
+    .autocomplete-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border: 1px solid #ddd;
+        border-top: none;
+        background: white;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .autocomplete-item {
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .autocomplete-item:hover {
+        background-color: #f5f5f5;
+    }
+
+    .no-results,
+    .error {
+        padding: 10px;
+        color: #999;
+        font-style: italic;
+    }
+</style>

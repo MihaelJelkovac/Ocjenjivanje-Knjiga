@@ -1,0 +1,38 @@
+@model Author
+@{
+    ViewData["Title"] = "Detalji autora";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Authors" asp-action="Index">Autori</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.FirstName @Model.LastName</li>
+    </ol>
+</nav>
+
+<section class="panel-card mb-4">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Details</p>
+            <h2>@Model.FirstName @Model.LastName</h2>
+        </div>
+    </div>
+
+    <p><strong>Nacionalnost:</strong> @Model.Nationality</p>
+    <p><strong>Datum rođenja:</strong> @Model.BirthDate.ToString("dd.MM.yyyy.")</p>
+    <p><strong>Website:</strong> <a href="@Model.Website" target="_blank" rel="noopener noreferrer">@Model.Website</a></p>
+    <p>@Model.Biography</p>
+</section>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <h2>Knjige autora</h2>
+    </div>
+    <ul class="app-linked-list">
+        @foreach (var book in Model.Books.OrderBy(book => book.Title))
+        {
+            <li><a asp-controller="Books" asp-action="Details" asp-route-id="@book.Id">@book.Title</a></li>
+        }
+    </ul>
+</section>

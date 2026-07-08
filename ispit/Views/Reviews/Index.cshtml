@@ -1,0 +1,61 @@
+@model IReadOnlyList<Review>
+@{
+    ViewData["Title"] = "Recenzije";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Recenzije</li>
+    </ol>
+</nav>
+
+<section class="panel-card">
+    <div class="panel-header">
+        <div>
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
+            </div>
+            <h2>Recenzije knjiga</h2>
+        </div>
+        <span class="panel-note">@Model.Count zapisa</span>
+    </div>
+
+    <!-- Search Form -->
+    <form class="search-form mb-3" data-search-url="/Reviews/Search">
+        <div class="form-group">
+            <label for="search-input" class="form-label">Pretraži recenzije</label>
+            <div class="input-group">
+                <input type="text" id="search-input" class="form-control" placeholder="Unesite naziv...">
+                <button type="reset" class="btn btn-outline-secondary">Očisti</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th>Naslov</th>
+                    <th>Ocjena</th>
+                    <th>Knjiga</th>
+                    <th>Korisnik</th>
+                    <th>Datum</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var review in Model)
+                {
+                    <tr data-id="@review.Id">
+                        <td><a asp-action="Details" asp-route-id="@review.Id">@review.Title</a></td>
+                        <td>@review.Score/5</td>
+                        <td><a asp-controller="Books" asp-action="Details"
+                                   asp-route-id="@review.BookId">@review.Book.Title</a></td>
+                            <td>@review.User.FullName</td>
+                            <td>@review.ReviewedAt.ToString("dd.MM.yyyy.")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
