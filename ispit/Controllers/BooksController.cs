@@ -17,6 +17,7 @@ public class BooksController : Controller
     private readonly IGenreRepository _genreRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<BooksController> _logger;
 
     public BooksController(
         IBookRepository bookRepository,
@@ -24,7 +25,8 @@ public class BooksController : Controller
         IPublisherRepository publisherRepository,
         IGenreRepository genreRepository,
         IHttpContextAccessor httpContextAccessor,
-        UserManager<AppUser> userManager)
+        UserManager<AppUser> userManager,
+        ILogger<BooksController> logger)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
@@ -32,6 +34,7 @@ public class BooksController : Controller
         _genreRepository = genreRepository;
         _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -39,8 +42,10 @@ public class BooksController : Controller
     [Route("index")]
     public async Task<IActionResult> Index()
     {
+        _logger.LogInformation("📖 Pristup Index akciji - Popis svih knjiga");
         var currentUser = await _userManager.GetUserAsync(User);
         var books = await _bookRepository.GetAllAsyncForUserAsync(currentUser?.Id);
+        _logger.LogInformation("✅ Učitano {BookCount} knjiga", books.Count);
         return View(books);
     }
 
@@ -73,6 +78,8 @@ public class BooksController : Controller
     [Route("create")]
     public async Task<IActionResult> Create(Book model)
     {
+        _logger.LogInformation("📝 Pokušaj kreiranja nove knjige: {BookTitle}", model.Title);
+
         // Try to resolve autocomplete display text to ids if the hidden id wasn't provided
         var authorSearch = Request.Form["AuthorId-search"].FirstOrDefault();
         if (model.AuthorId == 0 && !string.IsNullOrWhiteSpace(authorSearch))
@@ -104,6 +111,7 @@ public class BooksController : Controller
 
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("⚠️ Validacija nije prošla pri kreiranju: {BookTitle}", model.Title);
             await PopulateDropdownsAsync();
             return View(model);
         }
@@ -111,10 +119,12 @@ public class BooksController : Controller
         try
         {
             await _bookRepository.CreateAsync(model);
+            _logger.LogInformation("✅ Knjiga uspješno kreirana: {BookTitle}", model.Title);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri kreiranju knjige: {BookTitle}", model.Title);
             ModelState.AddModelError(string.Empty, "Greška pri spremanju: " + ex.Message);
             await PopulateDropdownsAsync();
             return View(model);
@@ -180,19 +190,24 @@ public class BooksController : Controller
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
+        _logger.LogInformation("🗑️ Pokušaj brisanja knjige ID: {BookId}", id);
+
         try
         {
             var success = await _bookRepository.DeleteAsync(id);
 
             if (!success)
             {
+                _logger.LogWarning("⚠️ Knjiga nije pronađena: {BookId}", id);
                 return Json(new { success = false, message = "Knjiga nije pronađena" });
             }
 
+            _logger.LogInformation("✅ Knjiga uspješno obrisana: {BookId}", id);
             return Json(new { success = true, message = "Knjiga je uspješno obrisana" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri brisanju knjige: {BookId}", id);
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }
