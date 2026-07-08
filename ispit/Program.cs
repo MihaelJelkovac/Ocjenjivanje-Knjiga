@@ -8,12 +8,16 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog konfiguracija
+// Serilog konfiguracija - koristi appsettings (Console za Production)
+builder.Host.UseSerilog((context, services, configuration) =>
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
+
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .WriteTo.File(
-        path: "Logs/app-.log",
-        rollingInterval: RollingInterval.Day,
+    .WriteTo.Console(
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
     )
     .CreateLogger();
@@ -36,22 +40,22 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CatalogDbContext")));
 
-builder.Services
-    .AddAuthentication()
-    .AddGoogle(options =>
-    {
-        var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
-        var clientId = googleAuthSection["ClientId"];
-        var clientSecret = googleAuthSection["ClientSecret"];
+var authBuilder = builder.Services.AddAuthentication();
 
-        // Only configure Google if credentials are provided (skip in test environment)
-        if (!string.IsNullOrEmpty(clientId) && !clientId.Contains("YOUR_") &&
-            !string.IsNullOrEmpty(clientSecret) && !clientSecret.Contains("YOUR_"))
-        {
-            options.ClientId = clientId;
-            options.ClientSecret = clientSecret;
-        }
+var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+var googleClientId = googleAuthSection["ClientId"];
+var googleClientSecret = googleAuthSection["ClientSecret"];
+
+// Only configure Google if credentials are provided (skip in test/production without keys)
+if (!string.IsNullOrEmpty(googleClientId) && !googleClientId.Contains("YOUR_") &&
+    !string.IsNullOrEmpty(googleClientSecret) && !googleClientSecret.Contains("YOUR_"))
+{
+    authBuilder.AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
     });
+}
 
 builder.Services
     .AddDefaultIdentity<AppUser>(options =>
