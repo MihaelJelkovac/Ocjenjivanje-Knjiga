@@ -46,7 +46,7 @@
             <tbody>
                 @foreach (var review in Model)
                 {
-                    <tr class="review-row" data-id="@review.Id">
+                    <tr data-id="@review.Id">
                         <td><a asp-action="Details" asp-route-id="@review.Id">@review.Title</a></td>
                         <td>@review.Score/5</td>
                         <td><a asp-controller="Books" asp-action="Details"
@@ -54,95 +54,8 @@
                             <td>@review.User.FullName</td>
                             <td>@review.ReviewedAt.ToString("dd.MM.yyyy.")</td>
                         </tr>
-                        <tr class="review-actions-row" data-review-id="@review.Id">
-                            <td colspan="5">
-                                <div class="review-actions">
-                                    <a href="/reviews/create-from-ai" class="btn btn-sm btn-outline-primary">
-                                        🤖 Kreiraj AI recenziju
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
                     }
                 </tbody>
             </table>
         </div>
     </section>
-
-<style>
-    .review-row {
-        position: relative;
-    }
-
-    .review-actions-row {
-        display: none;
-        background-color: #f8f9fa;
-        overflow: hidden;
-    }
-
-    .review-actions-row.show {
-        display: table-row;
-    }
-
-    .review-actions {
-        padding: 0.75rem 0;
-        animation: slideDown 0.3s ease-out;
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    @@keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .review-row:hover + .review-actions-row {
-        display: table-row;
-    }
-
-    .review-actions-row:hover {
-        display: table-row;
-    }
-
-    .btn-outline-primary:hover {
-        background-color: #0d6efd;
-        color: white;
-        transform: translateY(-2px);
-        transition: all 0.2s ease;
-    }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const reviewRows = document.querySelectorAll('.review-row');
-
-    reviewRows.forEach(row => {
-        const reviewId = row.getAttribute('data-id');
-        const actionsRow = document.querySelector(`.review-actions-row[data-review-id="${reviewId}"]`);
-
-        if (actionsRow) {
-            row.addEventListener('mouseenter', function() {
-                actionsRow.classList.add('show');
-            });
-
-            row.addEventListener('mouseleave', function() {
-                actionsRow.classList.remove('show');
-            });
-
-            actionsRow.addEventListener('mouseenter', function() {
-                actionsRow.classList.add('show');
-            });
-
-            actionsRow.addEventListener('mouseleave', function() {
-                actionsRow.classList.remove('show');
-            });
-        }
-    });
-});
-</script>
