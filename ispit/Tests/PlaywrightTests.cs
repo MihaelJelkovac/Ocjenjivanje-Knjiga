@@ -8,7 +8,7 @@ public class PlaywrightTests : IAsyncLifetime
     private IPlaywright? _playwright;
     private IBrowser? _browser;
     private IPage? _page;
-    private const string BaseUrl = "https://localhost:7003";
+    private const string BaseUrl = "https://ocjenjivanje-knjiga-production.up.railway.app";
 
     public async Task InitializeAsync()
     {
