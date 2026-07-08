@@ -1,4 +1,20 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "PowerShell(cd \"c:\\\\Users\\\\Mihael\\\\Desktop\\\\ASP.NET\" && pwsh bin/Debug/net9.0/playwright.ps1 install 2>&1 | tail -20)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet tool *)",
+      "Bash(playwright install *)",
+      "Bash(dotnet run *)",
+      "Bash(echo \"Application started in background, PID: $!\")",
+      "Bash(pkill -f \"dotnet run\")",
+      "Bash(curl -k https://localhost:7003/health)",
+      "Bash(dotnet test *)",
+      "Bash(timeout 180 dotnet test ispit/Lab5.csproj -c Release --no-build --filter \"PlaywrightTests\" -v normal)",
+      "Bash(timeout 180 dotnet test ispit/Lab5.csproj -c Release --no-build --filter \"PlaywrightTests\")"
+    ]
+  },
   "hooks": {
     "UserPromptSubmit": [
       {

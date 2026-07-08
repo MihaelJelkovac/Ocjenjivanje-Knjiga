@@ -8,39 +8,44 @@
             <h2>🤖 Kreiraj Recenziju putem AI-a</h2>
             <p class="text-muted">Napiši što misliš o knjizi, AI će automatski parsirati ocjenu i sentimen.</p>
 
+            <div class="examples-section">
+                <h4>📝 Primjeri kako napisati:</h4>
+                <ul>
+                    <li><code>"Harry Potter je fantastičan! Ocjena 5, preporuka da"</code></li>
+                    <li><code>"A Game of Thrones je dobar ali malo dugačak, ocjena 4"</code></li>
+                    <li><code>"The Fellowship of the Ring - ne sviđa mi se, ocjena 2"</code></li>
+                    <li><code>"Hobbit - super knjiga, odličan fantasy, 5 zvjezdica!"</code></li>
+                </ul>
+            </div>
+
             <form id="aiForm">
                 <div class="form-group mb-3">
-                    <label for="prompt" class="form-label">Što misliš o knjizi?</label>
+                    <label for="prompt" class="form-label"><strong>Što misliš o knjizi?</strong></label>
                     <textarea
                         class="form-control"
                         id="prompt"
-                        rows="5"
-                        placeholder="Primjer: Harry Potter je odličan! Preporuka da, ocjena 5, fantasy je super!"></textarea>
-                    <small class="text-muted">Dostupne knjige za testiranje: Harry Potter, A Game of Thrones, The Fellowship of the Ring</small>
+                        rows="6"
+                        placeholder="Primjer: Harry Potter je odličan! Preporuka da, ocjena 5, fantasy je super!"
+                        required></textarea>
+                    <small class="text-muted d-block mt-2">
+                        <strong>Dostupne knjige za testiranje:</strong> Harry Potter, A Game of Thrones, The Fellowship of the Ring, Hobbit
+                    </small>
                 </div>
 
-                <button type="submit" class="btn btn-primary">🚀 Kreiraj putem AI-a</button>
+                <button type="submit" class="btn btn-primary btn-lg w-100">🚀 Kreiraj putem AI-a</button>
             </form>
 
             <div id="result" class="mt-4"></div>
 
-            <hr class="my-5" />
-
-            <h4>📝 Primjeri kako napisati:</h4>
-            <ul>
-                <li><code>"Harry Potter je fantastičan! Ocjena 5, preporuka da"</code></li>
-                <li><code>"A Game of Thrones je dobar ali malo dugačak, ocjena 4"</code></li>
-                <li><code>"The Fellowship of the Ring - ne sviđa mi se, ocjena 2"</code></li>
-                <li><code>"Hobbit - super knjiga, odličan fantasy, 5 zvjezdica!"</code></li>
-            </ul>
-
-            <h4 class="mt-4">🔧 Što radi:</h4>
-            <ul>
-                <li>✅ Ekstrahira naziv knjige iz teksta</li>
-                <li>✅ Ekstrahira ocjenu (1-5 ili "odličan" → 5)</li>
-                <li>✅ Ekstrahira sentiment (Positive, Negative, Neutral, Enthusiastic)</li>
-                <li>✅ Pravi preporuku (ako je ocjena viša ili kaže "preporuka")</li>
-            </ul>
+            <div class="features-section mt-4">
+                <h4>🔧 Što radi AI parser:</h4>
+                <ul>
+                    <li>✅ Ekstrahira naziv knjige iz teksta</li>
+                    <li>✅ Ekstrahira ocjenu (1-5 ili ključne riječi kao "odličan" → 5)</li>
+                    <li>✅ Ekstrahira sentiment (Positive, Negative, Neutral, Enthusiastic)</li>
+                    <li>✅ Pravi preporuku (ako je ocjena viša ili kaže "preporuka")</li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -91,10 +96,73 @@ document.getElementById('aiForm').addEventListener('submit', async (e) => {
 </script>
 
 <style>
+    #aiForm {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+
+    .examples-section {
+        background-color: #e7f3ff;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #0d6efd;
+        margin-bottom: 2rem;
+    }
+
+    .examples-section h4 {
+        color: #0d6efd;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .examples-section ul {
+        margin-bottom: 0;
+    }
+
+    .examples-section li {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
     code {
-        background-color: #f4f4f4;
-        padding: 2px 6px;
-        border-radius: 3px;
+        background-color: #fff;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
         font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+
+    .features-section {
+        background-color: #f0f9f6;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #198754;
+    }
+
+    .features-section h4 {
+        color: #198754;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .features-section ul {
+        margin-bottom: 0;
+    }
+
+    .features-section li {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    textarea#prompt {
+        font-size: 1rem;
+        line-height: 1.6;
     }
 </style>
