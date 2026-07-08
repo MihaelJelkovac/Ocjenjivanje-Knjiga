@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Lab5.Models;
 using Lab5.Services;
 using Lab5.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Lab5.Controllers;
 
@@ -41,6 +42,14 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    [AllowAnonymous]
+    [Route("health")]
+    [Route("/Health")]
+    public IActionResult Health()
+    {
+        return Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
     }
 }
 

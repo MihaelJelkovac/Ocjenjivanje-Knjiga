@@ -1,0 +1,55 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ispit/Lab5.csproj
+
+      - name: Build
+        run: dotnet build ispit/Lab5.csproj -c Release --no-restore
+
+      - name: Run tests
+        run: dotnet test ispit.Tests/Lab5Tests.csproj -c Release --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish ispit/Lab5.csproj -c Release -o ./publish
+
+      - name: Docker Build and Push
+        if: success()
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/book-review-app:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/book-review-app:latest
+
+      - name: Deploy to Azure Web App
+        if: success()
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          images: ${{ secrets.DOCKER_USERNAME }}/book-review-app:latest
+
+      - name: Notify deployment
+        if: success()
+        run: echo "✅ Successfully deployed to Azure!"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ Deployment failed - check logs above"

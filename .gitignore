@@ -8,3 +8,16 @@
 *.db
 *.db-shm
 *.db-wal
+publish/
+**/publish/
+*.log
+appsettings.*.json
+.env
+.env.local
+node_modules/
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
