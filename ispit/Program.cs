@@ -2,6 +2,7 @@ using Lab5.Data;
 using Lab5.Mcp;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -103,6 +104,17 @@ builder.Services.AddScoped<IAIService>(sp =>
 );
 
 var app = builder.Build();
+
+// Railway (i slični PaaS provideri) terminiraju HTTPS na edge-u i prosljeđuju zahtjeve
+// interno preko HTTP-a - bez ovoga app misli da je zahtjev http:// pa generira pogrešan
+// (http umjesto https) redirect_uri za Google OAuth.
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
 
 // Ensure database is created and migrated
 using (var scope = app.Services.CreateScope())
