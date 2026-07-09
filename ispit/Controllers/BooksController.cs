@@ -15,7 +15,6 @@ public class BooksController : Controller
     private readonly IAuthorRepository _authorRepository;
     private readonly IPublisherRepository _publisherRepository;
     private readonly IGenreRepository _genreRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<BooksController> _logger;
     private readonly IAIService _aiService;
@@ -25,7 +24,6 @@ public class BooksController : Controller
         IAuthorRepository authorRepository,
         IPublisherRepository publisherRepository,
         IGenreRepository genreRepository,
-        IHttpContextAccessor httpContextAccessor,
         UserManager<AppUser> userManager,
         ILogger<BooksController> logger,
         IAIService aiService)
@@ -34,7 +32,6 @@ public class BooksController : Controller
         _authorRepository = authorRepository;
         _publisherRepository = publisherRepository;
         _genreRepository = genreRepository;
-        _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
         _logger = logger;
         _aiService = aiService;
@@ -252,9 +249,11 @@ public class BooksController : Controller
             var bookData = await _aiService.ExtractBookFromPromptAsync(request.Prompt);
 
             var authors = await _authorRepository.GetAllAsync();
-            var author = authors.FirstOrDefault(a =>
-                $"{a.FirstName} {a.LastName}".Contains(bookData.AuthorName, StringComparison.OrdinalIgnoreCase) ||
-                bookData.AuthorName.Contains(a.LastName, StringComparison.OrdinalIgnoreCase));
+            var author = string.IsNullOrWhiteSpace(bookData.AuthorName)
+                ? null
+                : authors.FirstOrDefault(a =>
+                    $"{a.FirstName} {a.LastName}".Contains(bookData.AuthorName, StringComparison.OrdinalIgnoreCase) ||
+                    bookData.AuthorName.Contains(a.LastName, StringComparison.OrdinalIgnoreCase));
 
             if (author == null)
             {

@@ -205,7 +205,7 @@ public class ReviewsController : Controller
             .Select(r => new { id = r.Id, text = r.Title }));
     }
 
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet]
     [Route("create-from-ai")]
     public IActionResult CreateFromAI()
@@ -213,7 +213,7 @@ public class ReviewsController : Controller
         return View();
     }
 
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost]
     [Route("create-from-ai")]
     public async Task<IActionResult> CreateFromAIPost([FromBody] AIPromptRequest request)
@@ -230,8 +230,10 @@ public class ReviewsController : Controller
 
             // 2. Pronađi knjiga
             var books = await _bookRepository.GetAllAsync();
-            var book = books.FirstOrDefault(b =>
-                b.Title.Contains(reviewData.BookTitle, StringComparison.OrdinalIgnoreCase));
+            var book = string.IsNullOrWhiteSpace(reviewData.BookTitle)
+                ? null
+                : books.FirstOrDefault(b =>
+                    b.Title.Contains(reviewData.BookTitle, StringComparison.OrdinalIgnoreCase));
 
             if (book == null)
             {

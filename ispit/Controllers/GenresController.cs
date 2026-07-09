@@ -143,11 +143,11 @@ public class GenresController : Controller
             if (!success)
             {
                 _logger.LogWarning("⚠️ Žanr nije pronađen: {GenreId}", id);
-                return Json(new { success = false, message = "ŽAnr nije pronađen" });
+                return Json(new { success = false, message = "Žanr nije pronađen" });
             }
 
             _logger.LogInformation("✅ Žanr uspješno obrisan: {GenreId}", id);
-            return Json(new { success = true, message = "ŽAnr je uspješno obrisan" });
+            return Json(new { success = true, message = "Žanr je uspješno obrisan" });
         }
         catch (Exception ex)
         {
