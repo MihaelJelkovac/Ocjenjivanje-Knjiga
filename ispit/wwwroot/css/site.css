@@ -468,6 +468,23 @@ button.accept-policy {
   justify-content: flex-end;
 }
 
+.app-nav-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 1 220px;
+}
+
+.app-nav-search input[type="search"] {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  color: #eef2ff;
+}
+
+.app-nav-search input[type="search"]::placeholder {
+  color: rgba(226, 232, 240, 0.55);
+}
+
 .app-nav .nav-link,
 .app-nav .navbar-brand {
   color: #eef2ff !important;

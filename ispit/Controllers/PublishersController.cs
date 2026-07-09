@@ -10,10 +10,12 @@ namespace Lab5.Controllers;
 public class PublishersController : Controller
 {
     private readonly IPublisherRepository _repository;
+    private readonly ILogger<PublishersController> _logger;
 
-    public PublishersController(IPublisherRepository repository)
+    public PublishersController(IPublisherRepository repository, ILogger<PublishersController> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -52,18 +54,23 @@ public class PublishersController : Controller
     [Route("create")]
     public async Task<IActionResult> Create(Publisher model)
     {
+        _logger.LogInformation("📝 Pokušaj kreiranja novog izdavača: {PublisherName}", model.Name);
+
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("⚠️ Validacija nije prošla pri kreiranju izdavača: {PublisherName}", model.Name);
             return View(model);
         }
 
         try
         {
             await _repository.CreateAsync(model);
+            _logger.LogInformation("✅ Izdavač uspješno kreiran: {PublisherName}", model.Name);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri kreiranju izdavača: {PublisherName}", model.Name);
             ModelState.AddModelError(string.Empty, "Greška pri spremanju: " + ex.Message);
             return View(model);
         }
@@ -111,10 +118,12 @@ public class PublishersController : Controller
                 throw new Exception("Neuspješno ažuriranje");
             }
 
+            _logger.LogInformation("✅ Izdavač uspješno ažuriran: {PublisherId}", publisher.Id);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri ažuriranju izdavača: {PublisherId}", publisher.Id);
             ModelState.AddModelError(string.Empty, "Greška pri ažuriranju: " + ex.Message);
             return View("Edit", publisher);
         }
@@ -125,19 +134,24 @@ public class PublishersController : Controller
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
+        _logger.LogInformation("🗑️ Pokušaj brisanja izdavača ID: {PublisherId}", id);
+
         try
         {
             var success = await _repository.DeleteAsync(id);
 
             if (!success)
             {
+                _logger.LogWarning("⚠️ Izdavač nije pronađen: {PublisherId}", id);
                 return Json(new { success = false, message = "Izdavač nije pronađen" });
             }
 
+            _logger.LogInformation("✅ Izdavač uspješno obrisan: {PublisherId}", id);
             return Json(new { success = true, message = "Izdavač je uspješno obrisan" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri brisanju izdavača: {PublisherId}", id);
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }

@@ -18,6 +18,7 @@ public class BooksController : Controller
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<BooksController> _logger;
+    private readonly IAIService _aiService;
 
     public BooksController(
         IBookRepository bookRepository,
@@ -26,7 +27,8 @@ public class BooksController : Controller
         IGenreRepository genreRepository,
         IHttpContextAccessor httpContextAccessor,
         UserManager<AppUser> userManager,
-        ILogger<BooksController> logger)
+        ILogger<BooksController> logger,
+        IAIService aiService)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
@@ -35,6 +37,7 @@ public class BooksController : Controller
         _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
         _logger = logger;
+        _aiService = aiService;
     }
 
     [AllowAnonymous]
@@ -175,10 +178,12 @@ public class BooksController : Controller
                 throw new Exception("Neuspješno ažuriranje");
             }
 
+            _logger.LogInformation("✅ Knjiga uspješno ažurirana: {BookId} - {BookTitle}", book.Id, book.Title);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri ažuriranju knjige: {BookId}", book.Id);
             ModelState.AddModelError(string.Empty, "Greška pri ažuriranju: " + ex.Message);
             await PopulateDropdownsAsync(book);
             return View("Edit", book);
@@ -225,6 +230,86 @@ public class BooksController : Controller
                 (b.Publisher != null && b.Publisher.Name.Contains(query ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
             .Take(50)
             .Select(b => new { id = b.Id, text = b.Title }));
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet]
+    [Route("create-from-ai")]
+    public IActionResult CreateFromAI() => View();
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost]
+    [Route("create-from-ai")]
+    public async Task<IActionResult> CreateFromAIPost([FromBody] AIPromptRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("🤖 Primljen AI prompt za knjigu: {Prompt}", request.Prompt);
+
+            if (string.IsNullOrWhiteSpace(request.Prompt))
+                return BadRequest(new { error = "Prompt ne može biti prazan" });
+
+            var bookData = await _aiService.ExtractBookFromPromptAsync(request.Prompt);
+
+            var authors = await _authorRepository.GetAllAsync();
+            var author = authors.FirstOrDefault(a =>
+                $"{a.FirstName} {a.LastName}".Contains(bookData.AuthorName, StringComparison.OrdinalIgnoreCase) ||
+                bookData.AuthorName.Contains(a.LastName, StringComparison.OrdinalIgnoreCase));
+
+            if (author == null)
+            {
+                _logger.LogWarning("⚠️ Autor nije pronađen: {AuthorName}", bookData.AuthorName);
+                return BadRequest(new
+                {
+                    error = $"Autor '{bookData.AuthorName}' nije pronađen",
+                    suggestion = "Dostupni autori: " + string.Join(", ", authors.Select(a => $"{a.FirstName} {a.LastName}"))
+                });
+            }
+
+            var publishers = await _publisherRepository.GetAllAsync();
+            var publisher = publishers.FirstOrDefault();
+            if (publisher == null)
+            {
+                _logger.LogWarning("⚠️ Nema dostupnih izdavača za kreiranje knjige");
+                return BadRequest(new { error = "Nema dostupnih izdavača u sustavu" });
+            }
+
+            var book = new Book
+            {
+                Title = bookData.Title,
+                Isbn = bookData.ISBN,
+                Description = $"Knjiga kreirana putem AI upita: \"{request.Prompt}\"",
+                PublishedOn = DateTime.UtcNow,
+                PageCount = bookData.PageCount,
+                Language = bookData.Language,
+                Status = BookStatus.Available,
+                AuthorId = author.Id,
+                PublisherId = publisher.Id
+            };
+
+            await _bookRepository.CreateAsync(book);
+
+            _logger.LogInformation("✅ Knjiga kreirana kroz AI: {BookTitle}, Autor: {AuthorName}", book.Title, bookData.AuthorName);
+
+            return Ok(new
+            {
+                success = true,
+                bookId = book.Id,
+                message = $"✅ Knjiga '{book.Title}' uspješno kreirana",
+                book = new
+                {
+                    title = book.Title,
+                    author = $"{author.FirstName} {author.LastName}",
+                    isbn = book.Isbn,
+                    pageCount = book.PageCount
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Greška pri AI kreiranju knjige");
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     private async Task PopulateDropdownsAsync(Book? book = null)

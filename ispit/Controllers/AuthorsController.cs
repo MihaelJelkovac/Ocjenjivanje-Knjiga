@@ -11,10 +11,12 @@ namespace Lab5.Controllers;
 public class AuthorsController : Controller
 {
     private readonly IAuthorRepository _repository;
+    private readonly ILogger<AuthorsController> _logger;
 
-    public AuthorsController(IAuthorRepository repository)
+    public AuthorsController(IAuthorRepository repository, ILogger<AuthorsController> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -53,18 +55,23 @@ public class AuthorsController : Controller
     [Route("create")]
     public async Task<IActionResult> Create(Author model)
     {
+        _logger.LogInformation("📝 Pokušaj kreiranja novog autora: {FirstName} {LastName}", model.FirstName, model.LastName);
+
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("⚠️ Validacija nije prošla pri kreiranju autora: {FirstName} {LastName}", model.FirstName, model.LastName);
             return View(model);
         }
 
         try
         {
             await _repository.CreateAsync(model);
+            _logger.LogInformation("✅ Autor uspješno kreiran: {FirstName} {LastName}", model.FirstName, model.LastName);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri kreiranju autora: {FirstName} {LastName}", model.FirstName, model.LastName);
             ModelState.AddModelError(string.Empty, "Greška pri spremanju: " + ex.Message);
             return View(model);
         }
@@ -113,10 +120,12 @@ public class AuthorsController : Controller
                 throw new Exception("Neuspješno ažuriranje");
             }
 
+            _logger.LogInformation("✅ Autor uspješno ažuriran: {AuthorId}", author.Id);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri ažuriranju autora: {AuthorId}", author.Id);
             ModelState.AddModelError(string.Empty, "Greška pri ažuriranju: " + ex.Message);
             return View("Edit", author);
         }
@@ -127,19 +136,24 @@ public class AuthorsController : Controller
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
+        _logger.LogInformation("🗑️ Pokušaj brisanja autora ID: {AuthorId}", id);
+
         try
         {
             var success = await _repository.DeleteAsync(id);
 
             if (!success)
             {
+                _logger.LogWarning("⚠️ Autor nije pronađen: {AuthorId}", id);
                 return Json(new { success = false, message = "Autor nije pronađen" });
             }
 
+            _logger.LogInformation("✅ Autor uspješno obrisan: {AuthorId}", id);
             return Json(new { success = true, message = "Autor je uspješno obrisan" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri brisanju autora: {AuthorId}", id);
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }

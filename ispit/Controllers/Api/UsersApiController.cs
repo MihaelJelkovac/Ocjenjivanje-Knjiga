@@ -12,7 +12,7 @@ public class UsersApiController : BaseApiController
 {
     private readonly IUserRepository _repository;
 
-    public UsersApiController(IUserRepository repository)
+    public UsersApiController(IUserRepository repository, ILogger<UsersApiController> logger) : base(logger)
     {
         _repository = repository;
     }
@@ -48,6 +48,7 @@ public class UsersApiController : BaseApiController
             IsPremiumMember = model.IsPremiumMember
         });
 
+        Logger.LogInformation("✅ [API] Korisnik kreiran: {UserId} - {Username}", user.Id, user.Username);
         return CreatedAtAction(nameof(GetById), new { id = user.Id }, ApiDtoMapper.ToDto(user));
     }
 
@@ -67,6 +68,7 @@ public class UsersApiController : BaseApiController
         user.IsPremiumMember = model.IsPremiumMember;
 
         await _repository.UpdateAsync(user);
+        Logger.LogInformation("✅ [API] Korisnik ažuriran: {UserId}", user.Id);
         return Ok(ApiDtoMapper.ToDto(user));
     }
 
@@ -75,6 +77,7 @@ public class UsersApiController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);
+        Logger.LogInformation(deleted ? "✅ [API] Korisnik obrisan: {UserId}" : "⚠️ [API] Korisnik nije pronađen: {UserId}", id);
         return deleted ? NoContent() : NotFound();
     }
 }

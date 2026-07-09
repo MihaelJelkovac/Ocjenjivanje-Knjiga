@@ -14,7 +14,7 @@ public class BooksApiController : BaseApiController
     private readonly IBookRepository _bookRepository;
     private readonly UserManager<AppUser> _userManager;
 
-    public BooksApiController(IBookRepository bookRepository, UserManager<AppUser> userManager)
+    public BooksApiController(IBookRepository bookRepository, UserManager<AppUser> userManager, ILogger<BooksApiController> logger) : base(logger)
     {
         _bookRepository = bookRepository;
         _userManager = userManager;
@@ -63,6 +63,7 @@ public class BooksApiController : BaseApiController
             PublisherId = model.PublisherId
         });
 
+        Logger.LogInformation("✅ [API] Knjiga kreirana: {BookId} - {BookTitle}", book.Id, book.Title);
         return CreatedAtAction(nameof(GetById), new { id = book.Id }, ApiDtoMapper.ToDto(book));
     }
 
@@ -85,6 +86,7 @@ public class BooksApiController : BaseApiController
         book.PublisherId = model.PublisherId;
 
         await _bookRepository.UpdateAsync(book);
+        Logger.LogInformation("✅ [API] Knjiga ažurirana: {BookId}", book.Id);
         return Ok(ApiDtoMapper.ToDto(book));
     }
 
@@ -93,6 +95,7 @@ public class BooksApiController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _bookRepository.DeleteAsync(id);
+        Logger.LogInformation(deleted ? "✅ [API] Knjiga obrisana: {BookId}" : "⚠️ [API] Knjiga nije pronađena: {BookId}", id);
         return deleted ? NoContent() : NotFound();
     }
 }

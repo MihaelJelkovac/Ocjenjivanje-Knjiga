@@ -10,10 +10,12 @@ namespace Lab5.Controllers;
 public class UsersController : Controller
 {
     private readonly IUserRepository _repository;
+    private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IUserRepository repository)
+    public UsersController(IUserRepository repository, ILogger<UsersController> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -52,18 +54,23 @@ public class UsersController : Controller
     [Route("create")]
     public async Task<IActionResult> Create(User model)
     {
+        _logger.LogInformation("📝 Pokušaj kreiranja novog korisnika: {Username}", model.Username);
+
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("⚠️ Validacija nije prošla pri kreiranju korisnika: {Username}", model.Username);
             return View(model);
         }
 
         try
         {
             await _repository.CreateAsync(model);
+            _logger.LogInformation("✅ Korisnik uspješno kreiran: {Username}", model.Username);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri kreiranju korisnika: {Username}", model.Username);
             ModelState.AddModelError(string.Empty, "Greška pri spremanju: " + ex.Message);
             return View(model);
         }
@@ -111,10 +118,12 @@ public class UsersController : Controller
                 throw new Exception("Neuspješno ažuriranje");
             }
 
+            _logger.LogInformation("✅ Korisnik uspješno ažuriran: {UserId}", user.Id);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri ažuriranju korisnika: {UserId}", user.Id);
             ModelState.AddModelError(string.Empty, "Greška pri ažuriranju: " + ex.Message);
             return View("Edit", user);
         }
@@ -125,19 +134,24 @@ public class UsersController : Controller
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
+        _logger.LogInformation("🗑️ Pokušaj brisanja korisnika ID: {UserId}", id);
+
         try
         {
             var success = await _repository.DeleteAsync(id);
 
             if (!success)
             {
+                _logger.LogWarning("⚠️ Korisnik nije pronađen: {UserId}", id);
                 return Json(new { success = false, message = "Korisnik nije pronađen" });
             }
 
+            _logger.LogInformation("✅ Korisnik uspješno obrisan: {UserId}", id);
             return Json(new { success = true, message = "Korisnik je uspješno obrisan" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri brisanju korisnika: {UserId}", id);
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }

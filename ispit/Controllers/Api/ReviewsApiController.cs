@@ -12,7 +12,7 @@ public class ReviewsApiController : BaseApiController
 {
     private readonly IReviewRepository _reviewRepository;
 
-    public ReviewsApiController(IReviewRepository reviewRepository)
+    public ReviewsApiController(IReviewRepository reviewRepository, ILogger<ReviewsApiController> logger) : base(logger)
     {
         _reviewRepository = reviewRepository;
     }
@@ -54,6 +54,7 @@ public class ReviewsApiController : BaseApiController
             UserId = model.UserId
         });
 
+        Logger.LogInformation("✅ [API] Recenzija kreirana: {ReviewId} za knjigu {BookId}", review.Id, review.BookId);
         return CreatedAtAction(nameof(GetById), new { id = review.Id }, ApiDtoMapper.ToDto(review));
     }
 
@@ -74,6 +75,7 @@ public class ReviewsApiController : BaseApiController
         review.UserId = model.UserId;
 
         await _reviewRepository.UpdateAsync(review);
+        Logger.LogInformation("✅ [API] Recenzija ažurirana: {ReviewId}", review.Id);
         return Ok(ApiDtoMapper.ToDto(review));
     }
 
@@ -82,6 +84,7 @@ public class ReviewsApiController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _reviewRepository.DeleteAsync(id);
+        Logger.LogInformation(deleted ? "✅ [API] Recenzija obrisana: {ReviewId}" : "⚠️ [API] Recenzija nije pronađena: {ReviewId}", id);
         return deleted ? NoContent() : NotFound();
     }
 }

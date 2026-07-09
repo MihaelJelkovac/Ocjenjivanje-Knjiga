@@ -14,6 +14,10 @@
             <div class="container-fluid app-nav-inner">
                 <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">Ocijenjivanje
                     Knjiga</a>
+                    <form class="app-nav-search" method="get" asp-controller="Search" asp-action="Index" role="search">
+                        <input type="search" name="q" class="form-control" placeholder="Pretraži sve..." aria-label="Globalna pretraga" value="@Context.Request.Query["q"]">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Traži</button>
+                    </form>
                     <ul class="app-nav-list">
                         <li>
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>

@@ -11,16 +11,19 @@ namespace Lab5.Controllers;
 public class HomeController : Controller
 {
     private readonly IBookCatalogService _bookCatalogService;
+    private readonly ILogger<HomeController> _logger;
 
-    public HomeController(IBookCatalogService bookCatalogService)
+    public HomeController(IBookCatalogService bookCatalogService, ILogger<HomeController> logger)
     {
         _bookCatalogService = bookCatalogService;
+        _logger = logger;
     }
 
     [Route("")]
     [Route("index")]
     public async Task<IActionResult> Index()
     {
+        _logger.LogInformation("🏠 Pristup naslovnoj stranici");
         return View(await _bookCatalogService.GetDashboardAsync());
     }
 

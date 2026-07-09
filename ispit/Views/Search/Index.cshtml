@@ -1,0 +1,177 @@
+@model Lab5.Services.GlobalSearchResults
+@{
+    ViewData["Title"] = "Pretraga";
+    var hasQuery = !string.IsNullOrWhiteSpace(Model.Query);
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Pretraga</li>
+    </ol>
+</nav>
+
+<section class="panel-card mb-4" aria-labelledby="search-heading">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">Globalna pretraga</p>
+            <h2 id="search-heading">Pretraži cijeli katalog</h2>
+            <p class="panel-note mb-0">Jedna pretraga kroz knjige, autore, žanrove i izdavače odjednom.</p>
+        </div>
+        @if (hasQuery)
+        {
+            <span class="panel-note">@Model.TotalCount rezultata za "@Model.Query"</span>
+        }
+    </div>
+
+    <form method="get" asp-controller="Search" asp-action="Index" class="search-form">
+        <div class="form-group">
+            <label for="q" class="form-label">Pojam za pretragu</label>
+            <div class="input-group">
+                <input type="text" id="q" name="q" class="form-control" value="@Model.Query"
+                       placeholder="Unesite naslov, autora, žanr, izdavača..." autofocus>
+                <button type="submit" class="btn btn-primary">Pretraži</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+@if (!hasQuery)
+{
+    <section class="panel-card" role="status">
+        <p class="mb-0">Unesite pojam u polje iznad da pretražite sve knjige, autore, žanrove i izdavače odjednom.</p>
+    </section>
+}
+else if (Model.TotalCount == 0)
+{
+    <section class="panel-card" role="status" aria-live="polite">
+        <h3>Nema rezultata</h3>
+        <p class="mb-0">Nije pronađen nijedan zapis za "@Model.Query". Pokušajte s drugim pojmom.</p>
+    </section>
+}
+else
+{
+    if (Model.Books.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-books-heading">
+            <div class="panel-header">
+                <h3 id="search-books-heading">Knjige (@Model.Books.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Naslov</th>
+                            <th scope="col">Autor</th>
+                            <th scope="col">Izdavač</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in Model.Books)
+                        {
+                            <tr>
+                                <td>@book.Title</td>
+                                <td>@(book.Author != null ? $"{book.Author.FirstName} {book.Author.LastName}" : "-")</td>
+                                <td>@(book.Publisher?.Name ?? "-")</td>
+                                <td><a class="app-cta-link" asp-controller="Books" asp-action="Details" asp-route-id="@book.Id">Profil</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    if (Model.Authors.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-authors-heading">
+            <div class="panel-header">
+                <h3 id="search-authors-heading">Autori (@Model.Authors.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ime</th>
+                            <th scope="col">Nacionalnost</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var author in Model.Authors)
+                        {
+                            <tr>
+                                <td>@author.FirstName @author.LastName</td>
+                                <td>@author.Nationality</td>
+                                <td><a class="app-cta-link" asp-controller="Authors" asp-action="Details" asp-route-id="@author.Id">Profil</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    if (Model.Genres.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-genres-heading">
+            <div class="panel-header">
+                <h3 id="search-genres-heading">Žanrovi (@Model.Genres.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Naziv</th>
+                            <th scope="col">Publika</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var genre in Model.Genres)
+                        {
+                            <tr>
+                                <td>@genre.Name</td>
+                                <td>@(string.IsNullOrEmpty(genre.Audience) ? "-" : genre.Audience)</td>
+                                <td><a class="app-cta-link" asp-controller="Genres" asp-action="Details" asp-route-id="@genre.Id">Profil</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    if (Model.Publishers.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-publishers-heading">
+            <div class="panel-header">
+                <h3 id="search-publishers-heading">Izdavači (@Model.Publishers.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Naziv</th>
+                            <th scope="col">Grad</th>
+                            <th scope="col">Država</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var publisher in Model.Publishers)
+                        {
+                            <tr>
+                                <td>@publisher.Name</td>
+                                <td>@publisher.City</td>
+                                <td>@publisher.Country</td>
+                                <td><a class="app-cta-link" asp-controller="Publishers" asp-action="Details" asp-route-id="@publisher.Id">Profil</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+}

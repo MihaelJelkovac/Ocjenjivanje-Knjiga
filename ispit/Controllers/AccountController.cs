@@ -15,11 +15,13 @@ public class AccountController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly ILogger<AccountController> _logger;
 
-    public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+    public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -31,8 +33,11 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
+        _logger.LogInformation("📝 Pokušaj registracije: {Email}", model.Email);
+
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("⚠️ Validacija nije prošla pri registraciji: {Email}", model.Email);
             return View(model);
         }
 
@@ -47,9 +52,13 @@ public class AccountController : Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
+            _logger.LogInformation("✅ Korisnik uspješno registriran: {Email}", model.Email);
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("Index", "Home");
         }
+
+        _logger.LogWarning("⚠️ Registracija nije uspjela za {Email}: {Errors}",
+            model.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
 
         foreach (var error in result.Errors)
         {
@@ -72,6 +81,8 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
+        _logger.LogInformation("🔑 Pokušaj prijave: {Email}", model.Email);
+
         if (!ModelState.IsValid)
         {
             ViewBag.ReturnUrl = returnUrl;
@@ -81,9 +92,11 @@ public class AccountController : Controller
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
+            _logger.LogInformation("✅ Uspješna prijava: {Email}", model.Email);
             return RedirectToLocal(returnUrl);
         }
 
+        _logger.LogWarning("⚠️ Neuspješna prijava: {Email}", model.Email);
         ModelState.AddModelError(string.Empty, "Neispravna prijava.");
         ViewBag.ReturnUrl = returnUrl;
         return View(model);
@@ -93,6 +106,7 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(string? returnUrl = null)
     {
+        _logger.LogInformation("🚪 Odjava korisnika: {Email}", User.Identity?.Name);
         await _signInManager.SignOutAsync();
         return RedirectToLocal(returnUrl);
     }
@@ -101,6 +115,7 @@ public class AccountController : Controller
     [AllowAnonymous]
     public IActionResult ExternalLogin(string provider = GoogleDefaults.AuthenticationScheme, string? returnUrl = null)
     {
+        _logger.LogInformation("🔑 Pokretanje vanjske prijave preko: {Provider}", provider);
         var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
         var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
         return Challenge(properties, provider);
@@ -125,6 +140,7 @@ public class AccountController : Controller
         var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
         if (signInResult.Succeeded)
         {
+            _logger.LogInformation("✅ Uspješna vanjska prijava: {Provider}", info.LoginProvider);
             return RedirectToLocal(returnUrl);
         }
 
@@ -165,6 +181,7 @@ public class AccountController : Controller
             return View(nameof(Login));
         }
 
+        _logger.LogInformation("✅ Novi korisnik kreiran preko vanjske prijave: {Email}", email);
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToLocal(returnUrl);
     }

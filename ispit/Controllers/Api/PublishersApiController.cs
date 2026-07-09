@@ -12,7 +12,7 @@ public class PublishersApiController : BaseApiController
 {
     private readonly IPublisherRepository _repository;
 
-    public PublishersApiController(IPublisherRepository repository)
+    public PublishersApiController(IPublisherRepository repository, ILogger<PublishersApiController> logger) : base(logger)
     {
         _repository = repository;
     }
@@ -46,6 +46,7 @@ public class PublishersApiController : BaseApiController
             ContactEmail = model.ContactEmail
         });
 
+        Logger.LogInformation("✅ [API] Izdavač kreiran: {PublisherId} - {PublisherName}", publisher.Id, publisher.Name);
         return CreatedAtAction(nameof(GetById), new { id = publisher.Id }, ApiDtoMapper.ToDto(publisher));
     }
 
@@ -64,6 +65,7 @@ public class PublishersApiController : BaseApiController
         publisher.ContactEmail = model.ContactEmail;
 
         await _repository.UpdateAsync(publisher);
+        Logger.LogInformation("✅ [API] Izdavač ažuriran: {PublisherId}", publisher.Id);
         return Ok(ApiDtoMapper.ToDto(publisher));
     }
 
@@ -72,6 +74,7 @@ public class PublishersApiController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);
+        Logger.LogInformation(deleted ? "✅ [API] Izdavač obrisan: {PublisherId}" : "⚠️ [API] Izdavač nije pronađen: {PublisherId}", id);
         return deleted ? NoContent() : NotFound();
     }
 }

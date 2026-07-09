@@ -11,11 +11,13 @@ public class BookAttachmentsController : Controller
 {
     private readonly CatalogDbContext _context;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<BookAttachmentsController> _logger;
 
-    public BookAttachmentsController(CatalogDbContext context, IWebHostEnvironment environment)
+    public BookAttachmentsController(CatalogDbContext context, IWebHostEnvironment environment, ILogger<BookAttachmentsController> logger)
     {
         _context = context;
         _environment = environment;
+        _logger = logger;
     }
 
     [HttpGet("{bookId:int}")]
@@ -67,6 +69,7 @@ public class BookAttachmentsController : Controller
         _context.Attachments.Add(attachment);
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation("✅ Datoteka uspješno uploadana: {FileName} za knjigu {BookId}", file.FileName, bookId);
         return Json(new { success = true });
     }
 
@@ -74,9 +77,12 @@ public class BookAttachmentsController : Controller
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
+        _logger.LogInformation("🗑️ Pokušaj brisanja datoteke ID: {AttachmentId}", id);
+
         var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.Id == id);
         if (attachment is null)
         {
+            _logger.LogWarning("⚠️ Datoteka nije pronađena: {AttachmentId}", id);
             return NotFound();
         }
 
@@ -89,6 +95,7 @@ public class BookAttachmentsController : Controller
         _context.Attachments.Remove(attachment);
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation("✅ Datoteka uspješno obrisana: {AttachmentId}", id);
         return Json(new { success = true });
     }
 }

@@ -7,6 +7,13 @@ namespace Lab5.Controllers.Api;
 /// </summary>
 public abstract class BaseApiController : ControllerBase
 {
+    protected readonly ILogger Logger;
+
+    protected BaseApiController(ILogger logger)
+    {
+        Logger = logger;
+    }
+
     /// <summary>
     /// Normalizira i primjenjuje query string filter na kolekciju
     /// </summary>

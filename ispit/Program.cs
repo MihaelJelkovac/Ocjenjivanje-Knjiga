@@ -74,6 +74,7 @@ builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookAccessService, BookAccessService>();
+builder.Services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
 // Register AI Service
 builder.Services.AddHttpClient();

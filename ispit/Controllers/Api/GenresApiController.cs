@@ -12,7 +12,7 @@ public class GenresApiController : BaseApiController
 {
     private readonly IGenreRepository _repository;
 
-    public GenresApiController(IGenreRepository repository)
+    public GenresApiController(IGenreRepository repository, ILogger<GenresApiController> logger) : base(logger)
     {
         _repository = repository;
     }
@@ -43,6 +43,7 @@ public class GenresApiController : BaseApiController
             Audience = model.Audience
         });
 
+        Logger.LogInformation("✅ [API] Žanr kreiran: {GenreId} - {GenreName}", genre.Id, genre.Name);
         return CreatedAtAction(nameof(GetById), new { id = genre.Id }, ApiDtoMapper.ToDto(genre));
     }
 
@@ -58,6 +59,7 @@ public class GenresApiController : BaseApiController
         genre.Audience = model.Audience;
 
         await _repository.UpdateAsync(genre);
+        Logger.LogInformation("✅ [API] Žanr ažuriran: {GenreId}", genre.Id);
         return Ok(ApiDtoMapper.ToDto(genre));
     }
 
@@ -66,6 +68,7 @@ public class GenresApiController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);
+        Logger.LogInformation(deleted ? "✅ [API] Žanr obrisan: {GenreId}" : "⚠️ [API] Žanr nije pronađen: {GenreId}", id);
         return deleted ? NoContent() : NotFound();
     }
 }

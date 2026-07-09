@@ -12,7 +12,7 @@ public class AuthorsApiController : BaseApiController
 {
     private readonly IAuthorRepository _repository;
 
-    public AuthorsApiController(IAuthorRepository repository)
+    public AuthorsApiController(IAuthorRepository repository, ILogger<AuthorsApiController> logger) : base(logger)
     {
         _repository = repository;
     }
@@ -47,6 +47,7 @@ public class AuthorsApiController : BaseApiController
             Website = model.Website
         });
 
+        Logger.LogInformation("✅ [API] Autor kreiran: {AuthorId} - {FirstName} {LastName}", author.Id, author.FirstName, author.LastName);
         return CreatedAtAction(nameof(GetById), new { id = author.Id }, ApiDtoMapper.ToDto(author));
     }
 
@@ -65,6 +66,7 @@ public class AuthorsApiController : BaseApiController
         author.Website = model.Website;
 
         await _repository.UpdateAsync(author);
+        Logger.LogInformation("✅ [API] Autor ažuriran: {AuthorId}", author.Id);
         return Ok(ApiDtoMapper.ToDto(author));
     }
 
@@ -73,6 +75,7 @@ public class AuthorsApiController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _repository.DeleteAsync(id);
+        Logger.LogInformation(deleted ? "✅ [API] Autor obrisan: {AuthorId}" : "⚠️ [API] Autor nije pronađen: {AuthorId}", id);
         return deleted ? NoContent() : NotFound();
     }
 }

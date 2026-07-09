@@ -10,10 +10,12 @@ namespace Lab5.Controllers;
 public class GenresController : Controller
 {
     private readonly IGenreRepository _repository;
+    private readonly ILogger<GenresController> _logger;
 
-    public GenresController(IGenreRepository repository)
+    public GenresController(IGenreRepository repository, ILogger<GenresController> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -52,18 +54,23 @@ public class GenresController : Controller
     [Route("create")]
     public async Task<IActionResult> Create(Genre model)
     {
+        _logger.LogInformation("📝 Pokušaj kreiranja novog žanra: {GenreName}", model.Name);
+
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("⚠️ Validacija nije prošla pri kreiranju žanra: {GenreName}", model.Name);
             return View(model);
         }
 
         try
         {
             await _repository.CreateAsync(model);
+            _logger.LogInformation("✅ Žanr uspješno kreiran: {GenreName}", model.Name);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri kreiranju žanra: {GenreName}", model.Name);
             ModelState.AddModelError(string.Empty, "Greška pri spremanju: " + ex.Message);
             return View(model);
         }
@@ -111,10 +118,12 @@ public class GenresController : Controller
                 throw new Exception("Neuspješno ažuriranje");
             }
 
+            _logger.LogInformation("✅ Žanr uspješno ažuriran: {GenreId}", genre.Id);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri ažuriranju žanra: {GenreId}", genre.Id);
             ModelState.AddModelError(string.Empty, "Greška pri ažuriranju: " + ex.Message);
             return View("Edit", genre);
         }
@@ -125,19 +134,24 @@ public class GenresController : Controller
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
+        _logger.LogInformation("🗑️ Pokušaj brisanja žanra ID: {GenreId}", id);
+
         try
         {
             var success = await _repository.DeleteAsync(id);
 
             if (!success)
             {
+                _logger.LogWarning("⚠️ Žanr nije pronađen: {GenreId}", id);
                 return Json(new { success = false, message = "ŽAnr nije pronađen" });
             }
 
+            _logger.LogInformation("✅ Žanr uspješno obrisan: {GenreId}", id);
             return Json(new { success = true, message = "ŽAnr je uspješno obrisan" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri brisanju žanra: {GenreId}", id);
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }

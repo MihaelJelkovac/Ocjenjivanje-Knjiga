@@ -1,0 +1,144 @@
+@{
+    ViewData["Title"] = "Kreiraj Knjigu - AI";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb app-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Books" asp-action="Index">Knjige</a></li>
+        <li class="breadcrumb-item active" aria-current="page">AI Knjiga</li>
+    </ol>
+</nav>
+
+<section class="panel-card mb-4">
+    <div class="panel-header">
+        <div>
+            <p class="section-label">AI Asistent</p>
+            <h2>🤖 Kreiraj Knjigu putem AI-a</h2>
+            <p class="panel-note mb-0">Opišite knjigu prirodnim jezikom, AI će izvući naslov, autora, ISBN i broj stranica.</p>
+        </div>
+    </div>
+</section>
+
+<section class="panel-card ai-examples-section mb-4">
+    <h3>📝 Primjeri kako napisati:</h3>
+    <div class="examples-list">
+        <div class="example-item">
+            <code>"Dodaj knjigu Hobbit od J.R.R. Tolkiena, ima 310 stranica"</code>
+        </div>
+        <div class="example-item">
+            <code>"Nova knjiga: 1984, autor George Orwell, ISBN 978-0451524935, 328 stranica"</code>
+        </div>
+    </div>
+</section>
+
+<section class="panel-card ai-input-section mb-4">
+    <form id="aiForm">
+        <div class="form-group">
+            <label for="prompt" class="form-label"><strong>Opišite knjigu</strong></label>
+            <textarea
+                class="form-control"
+                id="prompt"
+                rows="6"
+                placeholder="Primjer: Dodaj knjigu Hobbit od J.R.R. Tolkiena, ima 310 stranica"
+                required></textarea>
+            <small class="form-text d-block mt-2">
+                <strong>Napomena:</strong> autor mora već postojati u sustavu (knjiga se veže na postojećeg autora).
+            </small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">🚀 Kreiraj putem AI-a</button>
+    </form>
+
+    <div id="result" class="mt-4"></div>
+</section>
+
+<script>
+document.getElementById('aiForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const prompt = document.getElementById('prompt').value;
+    const resultDiv = document.getElementById('result');
+
+    resultDiv.innerHTML = '⏳ Čekam AI odgovor...';
+
+    try {
+        const response = await fetch('/knjige/create-from-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompt })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>✅ ${data.message}</h5>
+                    <hr />
+                    <p><strong>Naslov:</strong> ${data.book.title}</p>
+                    <p><strong>Autor:</strong> ${data.book.author}</p>
+                    <p><strong>ISBN:</strong> ${data.book.isbn}</p>
+                    <p><strong>Broj stranica:</strong> ${data.book.pageCount}</p>
+                    <hr />
+                    <small class="text-success">✅ Knjiga ID: ${data.bookId}</small>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h5>❌ Greška</h5>
+                    <p><strong>Greška:</strong> ${data.error}</p>
+                    ${data.suggestion ? `<p><strong>Prijedlog:</strong> ${data.suggestion}</p>` : ''}
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<div class="alert alert-danger">❌ Greška: ${error.message}</div>`;
+    }
+});
+</script>
+
+<style>
+    .ai-examples-section,
+    .ai-input-section {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .ai-examples-section h3 {
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .examples-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .example-item {
+        padding: 1rem;
+        background-color: rgba(13, 110, 253, 0.05);
+        border-radius: 0.375rem;
+        border-left: 3px solid #0d6efd;
+    }
+
+    .example-item code {
+        background-color: transparent;
+        color: #0d6efd;
+        padding: 0;
+        border: none;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+
+    textarea#prompt {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .ai-input-section .btn-primary {
+        width: 100%;
+        margin-top: 1rem;
+    }
+</style>
