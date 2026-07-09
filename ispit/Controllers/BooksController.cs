@@ -1,7 +1,6 @@
 using Lab5.Models;
 using Lab5.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -15,7 +14,6 @@ public class BooksController : Controller
     private readonly IAuthorRepository _authorRepository;
     private readonly IPublisherRepository _publisherRepository;
     private readonly IGenreRepository _genreRepository;
-    private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<BooksController> _logger;
     private readonly IAIService _aiService;
 
@@ -24,7 +22,6 @@ public class BooksController : Controller
         IAuthorRepository authorRepository,
         IPublisherRepository publisherRepository,
         IGenreRepository genreRepository,
-        UserManager<AppUser> userManager,
         ILogger<BooksController> logger,
         IAIService aiService)
     {
@@ -32,7 +29,6 @@ public class BooksController : Controller
         _authorRepository = authorRepository;
         _publisherRepository = publisherRepository;
         _genreRepository = genreRepository;
-        _userManager = userManager;
         _logger = logger;
         _aiService = aiService;
     }
@@ -43,8 +39,7 @@ public class BooksController : Controller
     public async Task<IActionResult> Index()
     {
         _logger.LogInformation("📖 Pristup Index akciji - Popis svih knjiga");
-        var currentUser = await _userManager.GetUserAsync(User);
-        var books = await _bookRepository.GetAllAsyncForUserAsync(currentUser?.Id);
+        var books = await _bookRepository.GetAllAsync();
         _logger.LogInformation("✅ Učitano {BookCount} knjiga", books.Count);
         return View(books);
     }
@@ -54,8 +49,7 @@ public class BooksController : Controller
     [Route("detalji/{id:int}")]
     public async Task<IActionResult> Details(int id)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
-        var book = await _bookRepository.GetByIdForUserAsync(id, currentUser?.Id);
+        var book = await _bookRepository.GetByIdAsync(id);
         if (book is null)
         {
             return NotFound();
