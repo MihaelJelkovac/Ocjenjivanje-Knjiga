@@ -48,7 +48,18 @@
                 placeholder="Primjer: Harry Potter je odličan! Preporuka da, ocjena 5, fantasy je super!"
                 required></textarea>
             <small class="form-text d-block mt-2">
-                <strong>Dostupne knjige za testiranje:</strong> Harry Potter, A Game of Thrones, The Fellowship of the Ring, Hobbit
+                <strong>Dostupne knjige u katalogu:</strong>
+                @{
+                    var bookTitles = (List<string>)ViewBag.BookTitles;
+                }
+                @if (bookTitles.Any())
+                {
+                    @string.Join(", ", bookTitles)
+                }
+                else
+                {
+                    <span>Trenutno nema knjiga u katalogu.</span>
+                }
             </small>
         </div>
 
@@ -163,6 +174,9 @@ document.getElementById('aiForm').addEventListener('submit', async (e) => {
     textarea#prompt {
         font-size: 1rem;
         line-height: 1.6;
+        width: 100%;
+        box-sizing: border-box;
+        resize: vertical;
     }
 
     .ai-input-section .btn-primary {

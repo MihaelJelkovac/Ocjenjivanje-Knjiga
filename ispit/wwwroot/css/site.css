@@ -327,6 +327,17 @@ button.accept-policy {
   border-radius: 0.5rem;
 }
 
+.form-control,
+.form-select {
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+}
+
+textarea.form-control {
+  resize: vertical;
+}
+
 .form-select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -524,6 +535,8 @@ button.accept-policy {
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(148, 163, 184, 0.24);
   color: #eef2ff;
+  flex: 1;
+  min-width: 0;
 }
 
 .app-nav-search input[type="search"]::placeholder {

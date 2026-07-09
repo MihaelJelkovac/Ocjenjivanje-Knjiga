@@ -208,8 +208,10 @@ public class ReviewsController : Controller
     [Authorize]
     [HttpGet]
     [Route("create-from-ai")]
-    public IActionResult CreateFromAI()
+    public async Task<IActionResult> CreateFromAI()
     {
+        var books = await _bookRepository.GetAllAsync();
+        ViewBag.BookTitles = books.Select(b => b.Title).OrderBy(t => t).ToList();
         return View();
     }
 

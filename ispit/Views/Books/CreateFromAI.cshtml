@@ -43,7 +43,19 @@
                 placeholder="Primjer: Dodaj knjigu Hobbit od J.R.R. Tolkiena, ima 310 stranica"
                 required></textarea>
             <small class="form-text d-block mt-2">
-                <strong>Napomena:</strong> autor mora već postojati u sustavu (knjiga se veže na postojećeg autora).
+                <strong>Napomena:</strong> autor mora već postojati u sustavu (knjiga se veže na postojećeg autora).<br />
+                @{
+                    var authorNames = (List<string>)ViewBag.AuthorNames;
+                }
+                <strong>Dostupni autori:</strong>
+                @if (authorNames.Any())
+                {
+                    @string.Join(", ", authorNames)
+                }
+                else
+                {
+                    <span>Trenutno nema autora u sustavu.</span>
+                }
             </small>
         </div>
 
@@ -135,6 +147,9 @@ document.getElementById('aiForm').addEventListener('submit', async (e) => {
     textarea#prompt {
         font-size: 1rem;
         line-height: 1.6;
+        width: 100%;
+        box-sizing: border-box;
+        resize: vertical;
     }
 
     .ai-input-section .btn-primary {

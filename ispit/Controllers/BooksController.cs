@@ -232,7 +232,12 @@ public class BooksController : Controller
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet]
     [Route("create-from-ai")]
-    public IActionResult CreateFromAI() => View();
+    public async Task<IActionResult> CreateFromAI()
+    {
+        var authors = await _authorRepository.GetAllAsync();
+        ViewBag.AuthorNames = authors.Select(a => $"{a.FirstName} {a.LastName}").OrderBy(n => n).ToList();
+        return View();
+    }
 
     [Authorize(Roles = "Admin,Manager")]
     [HttpPost]
