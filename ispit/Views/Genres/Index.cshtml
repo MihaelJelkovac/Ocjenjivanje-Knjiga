@@ -1,6 +1,8 @@
 @model IReadOnlyList<Genre>
 @{
     ViewData["Title"] = "Žanrovi";
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Manager");
+    var canDelete = User.IsInRole("Admin");
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -13,9 +15,12 @@
 <section class="panel-card">
     <div class="panel-header">
         <div>
-            <div>
-                <a class="btn btn-primary" asp-action="Create">Dodaj žanr</a>
-            </div>
+            @if (canManage)
+            {
+                <div>
+                    <a class="btn btn-primary" asp-action="Create">Dodaj žanr</a>
+                </div>
+            }
             <h2>Žanrovi</h2>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
@@ -51,9 +56,15 @@
                         <td>@genre.BookGenres.Select(bg => bg.BookId).Distinct().Count()</td>
                         <td>
                             <a class="app-cta-link" asp-action="Details" asp-route-id="@genre.Id">Profil</a>
-                            <a class="app-cta-link" asp-action="Edit" asp-route-id="@genre.Id">Ažuriranje</a>
-                            <button type="button" class="app-cta-link btn-delete text-danger"
-                                    data-id="@genre.Id">Briši</button>
+                            @if (canManage)
+                            {
+                                <a class="app-cta-link" asp-action="Edit" asp-route-id="@genre.Id">Ažuriranje</a>
+                            }
+                            @if (canDelete)
+                            {
+                                <button type="button" class="app-cta-link btn-delete text-danger"
+                                        data-id="@genre.Id">Briši</button>
+                            }
                         </td>
                     </tr>
                 }

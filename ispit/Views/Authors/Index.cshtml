@@ -4,6 +4,8 @@
     var totalAuthors = Model.Count;
     var totalBooks = Model.Sum(a => a.Books.Count);
     var avgBooksPerAuthor = totalAuthors == 0 ? 0 : (decimal)totalBooks / totalAuthors;
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Manager");
+    var canDelete = User.IsInRole("Admin");
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -21,9 +23,12 @@
             <p class="panel-note mb-0">Pregledaj sve autore, njihovu nacionalnost i broj objavljenih knjiga.</p>
         </div>
         <span class="panel-note">@totalAuthors autora</span>
-        <div>
-            <a class="btn btn-primary" asp-action="Create">Dodaj autora</a>
-        </div>
+        @if (canManage)
+        {
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj autora</a>
+            </div>
+        }
     </div>
 
     <div class="authors-index-stats" role="list" aria-label="Sažetak kataloga autora">
@@ -108,9 +113,15 @@ else
                             </td>
                             <td>
                                 <a class="app-cta-link" asp-action="Details" asp-route-id="@author.Id">Profil</a>
-                                <a class="app-cta-link" asp-action="Edit" asp-route-id="@author.Id">Ažuriranje</a>
-                                <button type="button" class="app-cta-link btn-delete text-danger"
-                                        data-id="@author.Id">Briši</button>
+                                @if (canManage)
+                                {
+                                    <a class="app-cta-link" asp-action="Edit" asp-route-id="@author.Id">Ažuriranje</a>
+                                }
+                                @if (canDelete)
+                                {
+                                    <button type="button" class="app-cta-link btn-delete text-danger"
+                                            data-id="@author.Id">Briši</button>
+                                }
                             </td>
                         </tr>
                     }

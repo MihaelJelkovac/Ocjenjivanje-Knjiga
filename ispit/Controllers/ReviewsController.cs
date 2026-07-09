@@ -53,7 +53,7 @@ public class ReviewsController : Controller
         return View(review);
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     [HttpGet]
     [Route("create")]
     public async Task<IActionResult> Create()
@@ -62,7 +62,7 @@ public class ReviewsController : Controller
         return View();
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     [HttpPost]
     [Route("create")]
     public async Task<IActionResult> Create(Review model)
@@ -205,7 +205,7 @@ public class ReviewsController : Controller
             .Select(r => new { id = r.Id, text = r.Title }));
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     [HttpGet]
     [Route("create-from-ai")]
     public IActionResult CreateFromAI()
@@ -213,7 +213,7 @@ public class ReviewsController : Controller
         return View();
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     [HttpPost]
     [Route("create-from-ai")]
     public async Task<IActionResult> CreateFromAIPost([FromBody] AIPromptRequest request)

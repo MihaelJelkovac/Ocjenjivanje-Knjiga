@@ -1,6 +1,8 @@
 @model IReadOnlyList<User>
 @{
     ViewData["Title"] = "Korisnici";
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Manager");
+    var canDelete = User.IsInRole("Admin");
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -13,9 +15,12 @@
 <section class="panel-card">
     <div class="panel-header">
         <div>
-            <div>
-                <a class="btn btn-primary" asp-action="Create">Dodaj korisnika</a>
-            </div>
+            @if (canManage)
+            {
+                <div>
+                    <a class="btn btn-primary" asp-action="Create">Dodaj korisnika</a>
+                </div>
+            }
             <h2>Korisnici</h2>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
@@ -55,9 +60,15 @@
                         <td>@user.Reviews.Count</td>
                         <td>
                             <a class="app-cta-link" asp-action="Details" asp-route-id="@user.Id">Profil</a>
-                            <a class="app-cta-link" asp-action="Edit" asp-route-id="@user.Id">Ažuriranje</a>
-                            <button type="button" class="app-cta-link btn-delete text-danger"
-                                    data-id="@user.Id">Briši</button>
+                            @if (canManage)
+                            {
+                                <a class="app-cta-link" asp-action="Edit" asp-route-id="@user.Id">Ažuriranje</a>
+                            }
+                            @if (canDelete)
+                            {
+                                <button type="button" class="app-cta-link btn-delete text-danger"
+                                        data-id="@user.Id">Briši</button>
+                            }
                         </td>
                     </tr>
                 }

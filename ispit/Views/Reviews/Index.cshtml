@@ -1,6 +1,7 @@
 @model IReadOnlyList<Review>
 @{
     ViewData["Title"] = "Recenzije";
+    var canReview = User.Identity?.IsAuthenticated == true;
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -18,10 +19,13 @@
             <p class="panel-note mb-0">Pregledaj sve recenzije, ocjene i dojmove korisnika.</p>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
-        <div class="btn-group-reviews">
-            <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
-            <a class="btn btn-outline-primary" asp-action="CreateFromAI">🤖 AI Recenzija</a>
-        </div>
+        @if (canReview)
+        {
+            <div class="btn-group-reviews">
+                <a class="btn btn-primary" asp-action="Create">Dodaj recenziju</a>
+                <a class="btn btn-outline-primary" asp-action="CreateFromAI">🤖 AI Recenzija</a>
+            </div>
+        }
     </div>
 
     <!-- Search Form -->

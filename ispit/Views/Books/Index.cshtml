@@ -5,6 +5,8 @@
     var totalReviews = Model.Sum(book => book.Reviews.Count);
     var averageScore = totalReviews == 0 ? 0 : Model.SelectMany(book => book.Reviews).Average(review => review.Score);
     var availableBooks = Model.Count(book => book.Status == BookStatus.Available);
+    var canManage = User.IsInRole("Admin") || User.IsInRole("Manager");
+    var canDelete = User.IsInRole("Admin");
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -22,10 +24,13 @@
             <p class="panel-note mb-0">Brz pregled naslova, autora i recenzija uz direktan pristup detaljima.</p>
         </div>
         <span class="panel-note">@totalBooks zapisa</span>
-        <div>
-            <a class="btn btn-primary" asp-action="Create">Dodaj knjigu</a>
-            <a class="btn btn-outline-secondary" asp-action="CreateFromAI">🤖 AI Knjiga</a>
-        </div>
+        @if (canManage)
+        {
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj knjigu</a>
+                <a class="btn btn-outline-secondary" asp-action="CreateFromAI">🤖 AI Knjiga</a>
+            </div>
+        }
     </div>
 
     <div class="books-index-stats" role="list" aria-label="Sažetak kataloga">
@@ -109,9 +114,15 @@ else
                             <td>@book.Reviews.Count</td>
                             <td>
                                 <a class="app-cta-link" asp-action="Details" asp-route-id="@book.Id">Profil</a>
-                                <a class="app-cta-link" asp-action="Edit" asp-route-id="@book.Id">Ažuriranje</a>
-                                <button type="button" class="app-cta-link btn-delete text-danger"
-                                        data-id="@book.Id">Briši</button>
+                                @if (canManage)
+                                {
+                                    <a class="app-cta-link" asp-action="Edit" asp-route-id="@book.Id">Ažuriranje</a>
+                                }
+                                @if (canDelete)
+                                {
+                                    <button type="button" class="app-cta-link btn-delete text-danger"
+                                            data-id="@book.Id">Briši</button>
+                                }
                             </td>
                         </tr>
                     }

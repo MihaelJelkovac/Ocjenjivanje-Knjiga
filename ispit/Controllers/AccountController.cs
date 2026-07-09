@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
 using Lab5.Models;
+using Lab5.Services;
 using Lab5.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
@@ -182,6 +183,14 @@ public class AccountController : Controller
         }
 
         _logger.LogInformation("✅ Novi korisnik kreiran preko vanjske prijave: {Email}", email);
+
+        if (string.Equals(email, IdentitySeeder.DesignatedAdminEmail, StringComparison.OrdinalIgnoreCase)
+            && !await _userManager.IsInRoleAsync(user, "Admin"))
+        {
+            await _userManager.AddToRoleAsync(user, "Admin");
+            _logger.LogInformation("👑 Korisnik {Email} postavljen kao Admin", email);
+        }
+
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToLocal(returnUrl);
     }

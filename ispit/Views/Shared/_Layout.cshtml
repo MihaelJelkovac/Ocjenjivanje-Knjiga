@@ -14,42 +14,50 @@
             <div class="container-fluid app-nav-inner">
                 <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">Ocijenjivanje
                     Knjiga</a>
-                    <form class="app-nav-search" method="get" asp-controller="Search" asp-action="Index" role="search">
-                        <input type="search" name="q" class="form-control" placeholder="Pretraži sve..." aria-label="Globalna pretraga" value="@Context.Request.Query["q"]">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">Traži</button>
-                    </form>
-                    <ul class="app-nav-list">
-                        <li>
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Home" asp-action="RatingArena">Rating Arena</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Books" asp-action="Index">Knjige</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Authors" asp-action="Index">Autori</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Genres" asp-action="Index">Žanrovi</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Publishers" asp-action="Index">Izdavači</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Reviews" asp-action="Index">Recenzije</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-controller="Users" asp-action="Index">Korisnici</a>
-                        </li>
-                        <li>
-                            <partial name="_LoginPartial" />
-                        </li>
-                        <li>
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                    <button type="button" class="app-nav-toggle" id="appNavToggle" aria-label="Otvori izbornik"
+                            aria-expanded="false" aria-controls="appNavCollapse">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div class="app-nav-collapse" id="appNavCollapse">
+                        <form class="app-nav-search" method="get" asp-controller="Search" asp-action="Index" role="search">
+                            <input type="search" name="q" class="form-control" placeholder="Pretraži sve..." aria-label="Globalna pretraga" value="@Context.Request.Query["q"]">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Traži</button>
+                        </form>
+                        <ul class="app-nav-list">
+                            <li>
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Početna</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Home" asp-action="RatingArena">Rating Arena</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Books" asp-action="Index">Knjige</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Authors" asp-action="Index">Autori</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Genres" asp-action="Index">Žanrovi</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Publishers" asp-action="Index">Izdavači</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Reviews" asp-action="Index">Recenzije</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-controller="Users" asp-action="Index">Korisnici</a>
+                            </li>
+                            <li>
+                                <partial name="_LoginPartial" />
+                            </li>
+                            <li>
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </nav>
         </header>
@@ -76,6 +84,7 @@
         <script src="~/js/datetime-control.js" asp-append-version="true"></script>
         <script src="~/js/search.js" asp-append-version="true"></script>
         <script src="~/js/stars-animation.js" asp-append-version="true"></script>
+        <script src="~/js/nav-toggle.js" asp-append-version="true"></script>
 
         @await RenderSectionAsync("Scripts", required: false)
     </body>
