@@ -84,7 +84,6 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IBookAccessService, BookAccessService>();
 builder.Services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
 // Register MCP server - izlaže katalog knjiga kao alate dostupne kroz agentic IDE (npr. Claude Code)

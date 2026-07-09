@@ -27,36 +27,6 @@ public class BookRepository : IBookRepository
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyList<Book>> GetAllAsyncForUserAsync(string? appUserId)
-    {
-        // Ako nema appUserId (anoniman), vrati sve knjige
-        if (string.IsNullOrEmpty(appUserId))
-        {
-            return await GetAllAsync();
-        }
-
-        // Dohvati sve knjige na koje korisnik ima dozvolu
-        var authorizedBookIds = await _context.BookAccesses
-            .Where(ba => ba.AppUserId == appUserId &&
-                         ba.AccessLevel != "Denied" &&
-                         ba.DeletedAt == null &&
-                         (ba.ExpiresAt == null || ba.ExpiresAt > DateTime.UtcNow))
-            .Select(ba => ba.BookId)
-            .ToListAsync();
-
-        var books = await _context.Books
-            .Where(b => b.DeletedAt == null && authorizedBookIds.Contains(b.Id))
-            .Include(b => b.Author)
-            .Include(b => b.Publisher)
-            .Include(b => b.BookGenres)
-            .ThenInclude(bg => bg.Genre)
-            .Include(b => b.Reviews)
-            .OrderBy(book => book.Title)
-            .ToListAsync();
-
-        return books;
-    }
-
     public async Task<Book?> GetByIdAsync(int id)
     {
         // For Details view: Load all related data including Review user info
@@ -69,28 +39,6 @@ public class BookRepository : IBookRepository
             .Include(b => b.Reviews)
             .ThenInclude(r => r.User)
             .FirstOrDefaultAsync(item => item.Id == id);
-    }
-
-    public async Task<Book?> GetByIdForUserAsync(int id, string? appUserId)
-    {
-        // Ako nema appUserId (anoniman), vrati Book bez provere
-        if (string.IsNullOrEmpty(appUserId))
-        {
-            return await GetByIdAsync(id);
-        }
-
-        // Provjeri da li korisnik ima dozvolu za ovu knjugu
-        var hasAccess = await _context.BookAccesses
-            .AnyAsync(ba => ba.AppUserId == appUserId &&
-                            ba.BookId == id &&
-                            ba.AccessLevel != "Denied" &&
-                            ba.DeletedAt == null &&
-                            (ba.ExpiresAt == null || ba.ExpiresAt > DateTime.UtcNow));
-
-        if (!hasAccess)
-            return null;
-
-        return await GetByIdAsync(id);
     }
 
     public async Task<Book> CreateAsync(Book book)

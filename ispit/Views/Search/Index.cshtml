@@ -16,7 +16,7 @@
         <div>
             <p class="section-label">Globalna pretraga</p>
             <h2 id="search-heading">Pretraži cijeli katalog</h2>
-            <p class="panel-note mb-0">Jedna pretraga kroz knjige, autore, žanrove i izdavače odjednom.</p>
+            <p class="panel-note mb-0">Jedna pretraga kroz stranice/izbornik, knjige, autore, žanrove, izdavače, recenzije i korisnike odjednom.</p>
         </div>
         @if (hasQuery)
         {
@@ -39,7 +39,7 @@
 @if (!hasQuery)
 {
     <section class="panel-card" role="status">
-        <p class="mb-0">Unesite pojam u polje iznad da pretražite sve knjige, autore, žanrove i izdavače odjednom.</p>
+        <p class="mb-0">Unesite pojam u polje iznad da pretražite stranice/izbornik i sve podatke (knjige, autore, žanrove, izdavače, recenzije, korisnike) odjednom.</p>
     </section>
 }
 else if (Model.TotalCount == 0)
@@ -51,6 +51,36 @@ else if (Model.TotalCount == 0)
 }
 else
 {
+    if (Model.Pages.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-pages-heading">
+            <div class="panel-header">
+                <h3 id="search-pages-heading">Stranice / izbornik (@Model.Pages.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Stranica</th>
+                            <th scope="col">Opis</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var navPage in Model.Pages)
+                        {
+                            <tr>
+                                <td>@navPage.Title</td>
+                                <td>@navPage.Description</td>
+                                <td><a class="app-cta-link" href="@navPage.Url">Otvori</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
     if (Model.Books.Any())
     {
         <section class="panel-card mb-4" aria-labelledby="search-books-heading">

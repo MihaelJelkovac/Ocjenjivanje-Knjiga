@@ -2,6 +2,7 @@ using Lab5.Authorization;
 using Lab5.Dtos;
 using Lab5.Models;
 using Lab5.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab5.Controllers.Api;
@@ -38,8 +39,9 @@ public class ReviewsApiController : BaseApiController
         return review is null ? NotFound() : Ok(ApiDtoMapper.ToDto(review));
     }
 
+    // Kao i u MVC UI-ju: bilo koji prijavljeni korisnik može dati recenziju
     [HttpPost]
-    [AuthorizeAdminManager]
+    [Authorize]
     public async Task<ActionResult<ReviewDto>> Create([FromBody] ReviewUpsertDto model)
     {
         var review = await _reviewRepository.CreateAsync(new Review
