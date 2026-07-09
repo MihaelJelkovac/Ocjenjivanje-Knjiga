@@ -76,9 +76,13 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookAccessService, BookAccessService>();
 
 // Register AI Service
-var anthropicApiKey = builder.Configuration["Anthropic:ApiKey"] ?? "dummy-key-for-now";
+builder.Services.AddHttpClient();
+var mistralApiKey = builder.Configuration["Mistral:ApiKey"] ?? "dummy-key-for-now";
 builder.Services.AddScoped<IAIService>(sp =>
-    new AIService(anthropicApiKey, sp.GetRequiredService<ILogger<AIService>>())
+    new AIService(
+        mistralApiKey,
+        sp.GetRequiredService<ILogger<AIService>>(),
+        sp.GetRequiredService<IHttpClientFactory>().CreateClient())
 );
 
 var app = builder.Build();

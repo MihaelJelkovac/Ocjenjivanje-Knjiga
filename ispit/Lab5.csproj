@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Lab5</RootNamespace>
     <AssemblyName>Lab5</AssemblyName>
+    <UserSecretsId>ispit-lab5-9f2c7a3e-4b1d-4e6a-9c8f-2d6e5a1b7c30</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

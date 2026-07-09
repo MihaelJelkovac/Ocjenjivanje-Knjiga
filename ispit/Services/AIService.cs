@@ -1,70 +1,142 @@
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 
 namespace Lab5.Services;
 
 public class AIService : IAIService
 {
+    private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly ILogger<AIService> _logger;
 
-    public AIService(string apiKey, ILogger<AIService> logger)
+    private const string Model = "mistral-small-latest";
+    private const string ApiUrl = "https://api.mistral.ai/v1/chat/completions";
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    public AIService(string apiKey, ILogger<AIService> logger, HttpClient httpClient)
     {
         _apiKey = apiKey;
         _logger = logger;
+        _httpClient = httpClient;
     }
 
-    /// <summary>
-    /// Ekstrahira podatke recenzije iz teksta upita.
-    /// Za sada koristi dummy implementaciju - trebat će Claude API key
-    /// </summary>
+    private bool HasValidApiKey => !string.IsNullOrWhiteSpace(_apiKey) &&
+        _apiKey != "dummy-key-for-now" && !_apiKey.Contains("YOUR_") && _apiKey.Length > 20;
+
     public async Task<ReviewData> ExtractReviewFromPromptAsync(string prompt)
     {
+        _logger.LogInformation("🤖 AI: Parsiranje promptja: {Prompt}", prompt);
+
+        if (!HasValidApiKey)
+        {
+            _logger.LogWarning("⚠️ Mistral API key nije postavljen - koristim lokalni fallback parser");
+            return ParseReviewFromText(prompt);
+        }
+
+        const string systemPrompt = """
+            Ti si asistent koji parsira recenzije knjiga napisane na hrvatskom ili engleskom jeziku.
+            Vrati ISKLJUČIVO validan JSON objekt (bez markdown code blocka, bez dodatnog teksta) u formatu:
+            {"bookTitle": "naziv knjige", "score": broj_od_1_do_5, "sentiment": "Enthusiastic ili Positive ili Neutral ili Critical", "isRecommended": true ili false, "comment": "kratki komentar do 200 znakova"}
+            """;
+
         try
         {
-            _logger.LogInformation("🤖 AI: Parsiranje promptja: {Prompt}", prompt);
-
-            // Dummy implementacija - parsira očite znakove iz teksta
-            var reviewData = ParseReviewFromText(prompt);
+            var responseText = await CallMistralAsync(systemPrompt, prompt);
+            var reviewData = JsonSerializer.Deserialize<ReviewData>(responseText, JsonOptions)
+                ?? throw new InvalidOperationException("Mistral nije vratio valjani JSON");
 
             _logger.LogInformation("✅ AI: Uspješno parsirano - {BookTitle}, Ocjena: {Score}",
                 reviewData.BookTitle, reviewData.Score);
 
-            return await Task.FromResult(reviewData);
+            return reviewData;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ AI Greška pri parsiranju");
-            throw;
+            _logger.LogError(ex, "❌ Greška pri pozivu Mistral API-ja, koristim lokalni fallback parser");
+            return ParseReviewFromText(prompt);
         }
     }
 
-    /// <summary>
-    /// Ekstrahira podatke knjige iz teksta upita.
-    /// Za sada koristi dummy implementaciju - trebat će Claude API key
-    /// </summary>
     public async Task<BookData> ExtractBookFromPromptAsync(string prompt)
     {
+        _logger.LogInformation("🤖 AI: Parsiranje knjige iz promptja: {Prompt}", prompt);
+
+        if (!HasValidApiKey)
+        {
+            _logger.LogWarning("⚠️ Mistral API key nije postavljen - koristim lokalni fallback parser");
+            return ParseBookFromText(prompt);
+        }
+
+        const string systemPrompt = """
+            Ti si asistent koji parsira podatke o knjizi iz prirodnog jezika (hrvatski ili engleski).
+            Vrati ISKLJUČIVO validan JSON objekt (bez markdown code blocka, bez dodatnog teksta) u formatu:
+            {"title": "naslov knjige", "authorName": "ime i prezime autora", "isbn": "ISBN ili 000-0000000000 ako nije naveden", "pageCount": broj_stranica, "language": "eng ili hrv"}
+            """;
+
         try
         {
-            _logger.LogInformation("🤖 AI: Parsiranje knjige iz promptja: {Prompt}", prompt);
-
-            var bookData = ParseBookFromText(prompt);
+            var responseText = await CallMistralAsync(systemPrompt, prompt);
+            var bookData = JsonSerializer.Deserialize<BookData>(responseText, JsonOptions)
+                ?? throw new InvalidOperationException("Mistral nije vratio valjani JSON");
 
             _logger.LogInformation("✅ AI: Knjiga parsirana - {Title}, Autor: {Author}",
                 bookData.Title, bookData.AuthorName);
 
-            return await Task.FromResult(bookData);
+            return bookData;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ AI Greška pri parsiranju knjige");
-            throw;
+            _logger.LogError(ex, "❌ Greška pri pozivu Mistral API-ja, koristim lokalni fallback parser");
+            return ParseBookFromText(prompt);
         }
     }
 
+    private async Task<string> CallMistralAsync(string systemPrompt, string userPrompt)
+    {
+        var requestBody = new
+        {
+            model = Model,
+            messages = new[]
+            {
+                new { role = "system", content = systemPrompt },
+                new { role = "user", content = userPrompt }
+            },
+            response_format = new { type = "json_object" }
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, ApiUrl);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+        request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(request);
+        var responseJson = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("❌ Mistral API vratio {StatusCode}: {Body}", response.StatusCode, responseJson);
+            response.EnsureSuccessStatusCode();
+        }
+
+        _logger.LogInformation("🤖 Mistral sirovi odgovor: {Response}", responseJson);
+
+        using var doc = JsonDocument.Parse(responseJson);
+        var text = doc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString() ?? "{}";
+
+        return text.Replace("```json", "").Replace("```", "").Trim();
+    }
+
     /// <summary>
-    /// Dummy parser - izvlači informacije iz teksta na osnovu ključnih riječi
-    /// NAPOMENA: Ovo će biti zamijenjeno s Claude API-jem kada se vrati API key
+    /// Fallback parser koji se koristi kada Mistral API nije dostupan (nema key-a ili poziv je pao).
+    /// Izvlači informacije iz teksta na osnovu ključnih riječi.
     /// </summary>
     private ReviewData ParseReviewFromText(string text)
     {
@@ -72,7 +144,6 @@ public class AIService : IAIService
 
         text = text.ToLower();
 
-        // Ekstrahiraj naslov knjige - očekuje format: "Knjiga: XYZ" ili samo prvi dio
         if (text.Contains("za "))
         {
             var parts = text.Split(" za ");
@@ -86,38 +157,28 @@ public class AIService : IAIService
             data.BookTitle = ExtractFirstNoun(text);
         }
 
-        // Ekstrahiraj ocjenu (1-5)
         data.Score = ExtractScore(text);
-
-        // Ekstrahiraj sentiment
         data.Sentiment = ExtractSentiment(text);
 
-        // Preporuka
         data.IsRecommended = text.Contains("preporuka") ||
                            text.Contains("preporučujem") ||
                            text.Contains("odličan") ||
                            text.Contains("fantastičan") ||
                            data.Score >= 4;
 
-        // Komentar - uzmi prvi dio teksta
         data.Comment = text.Length > 200 ? text.Substring(0, 197) + "..." : text;
 
         return data;
     }
 
-    /// <summary>
-    /// Dummy parser za knjige
-    /// </summary>
     private BookData ParseBookFromText(string text)
     {
         var data = new BookData();
 
         text = text.ToLower();
 
-        // Ekstrahiraj naslov
         data.Title = ExtractFirstNoun(text);
 
-        // Ekstrahiraj autora
         if (text.Contains("autor:") || text.Contains("od "))
         {
             var parts = text.Split(" od ");
@@ -127,12 +188,8 @@ public class AIService : IAIService
             }
         }
 
-        // Ekstrahiraj ISBN
         data.ISBN = ExtractISBN(text) ?? "000-0000000000";
-
-        // Ekstrahiraj broj stranica
         data.PageCount = ExtractPageCount(text);
-
         data.Language = "eng";
 
         return data;
@@ -167,14 +224,12 @@ public class AIService : IAIService
 
     private int ExtractScore(string text)
     {
-        // Traži brojeve 1-5
         foreach (var match in System.Text.RegularExpressions.Regex.Matches(text, @"\b[1-5]\b").Cast<System.Text.RegularExpressions.Match>())
         {
             if (int.TryParse(match.Value, out int score))
                 return score;
         }
 
-        // Infer iz sentimenta
         if (text.Contains("odličan") || text.Contains("fantastičan") || text.Contains("super"))
             return 5;
         if (text.Contains("dobar") || text.Contains("solidan"))
@@ -186,7 +241,7 @@ public class AIService : IAIService
         if (text.Contains("teribilan") || text.Contains("grozno"))
             return 1;
 
-        return 3; // Default
+        return 3;
     }
 
     private string ExtractSentiment(string text)
@@ -212,7 +267,7 @@ public class AIService : IAIService
             if (int.TryParse(match.Value, out int pages) && pages > 50 && pages < 10000)
                 return pages;
         }
-        return 300; // Default
+        return 300;
     }
 
     private bool IsCommonWord(string word)
