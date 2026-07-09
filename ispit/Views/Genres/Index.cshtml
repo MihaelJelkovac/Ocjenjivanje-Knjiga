@@ -15,15 +15,15 @@
 <section class="panel-card">
     <div class="panel-header">
         <div>
-            @if (canManage)
-            {
-                <div>
-                    <a class="btn btn-primary" asp-action="Create">Dodaj žanr</a>
-                </div>
-            }
             <h2>Žanrovi</h2>
         </div>
         <span class="panel-note">@Model.Count zapisa</span>
+        @if (canManage)
+        {
+            <div>
+                <a class="btn btn-primary" asp-action="Create">Dodaj žanr</a>
+            </div>
+        }
     </div>
 
     <!-- Search Form -->
