@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Lab5.Models;
 using Lab5.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -50,7 +51,23 @@ public class ReviewsController : Controller
             return NotFound();
         }
 
+        // Recenziju smiju obrisati Admin ILI korisnik koji ju je napisao
+        ViewBag.CanDelete = CanDeleteReview(review);
         return View(review);
+    }
+
+    /// <summary>
+    /// Admin uvijek smije obrisati; autor (Identity korisnik koji je kreirao recenziju) smije obrisati svoju.
+    /// </summary>
+    private bool CanDeleteReview(Review review)
+    {
+        if (User.IsInRole("Admin"))
+        {
+            return true;
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return currentUserId != null && review.CreatedByUserId == currentUserId;
     }
 
     [Authorize]
@@ -75,6 +92,7 @@ public class ReviewsController : Controller
 
         try
         {
+            model.CreatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             await _reviewRepository.CreateAsync(model);
             return RedirectToAction(nameof(Index));
         }
@@ -140,24 +158,33 @@ public class ReviewsController : Controller
         }
     }
 
-    [Authorize(Roles = "Admin")]
+    // Brisati smiju Admin ILI autor recenzije (zato [Authorize], a ne samo Admin rola)
+    [Authorize]
     [HttpPost]
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         try
         {
-            var success = await _reviewRepository.DeleteAsync(id);
-
-            if (!success)
+            var review = await _reviewRepository.GetByIdAsync(id);
+            if (review is null)
             {
                 return Json(new { success = false, message = "Recenzija nije pronađena" });
             }
 
+            if (!CanDeleteReview(review))
+            {
+                _logger.LogWarning("⚠️ Neovlašten pokušaj brisanja recenzije {ReviewId}", id);
+                return Json(new { success = false, message = "Nemate ovlaštenje za brisanje ove recenzije" });
+            }
+
+            await _reviewRepository.DeleteAsync(id);
+            _logger.LogInformation("✅ Recenzija obrisana: {ReviewId}", id);
             return Json(new { success = true, message = "Recenzija je uspješno obrisana" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "❌ Greška pri brisanju recenzije: {ReviewId}", id);
             return Json(new { success = false, message = "Greška pri brisanju: " + ex.Message });
         }
     }
@@ -272,7 +299,8 @@ public class ReviewsController : Controller
                     ? reviewData.Comment.Substring(0, 47) + "..."
                     : reviewData.Comment,
                 Sentiment = Enum.Parse<ReviewSentiment>(reviewData.Sentiment, ignoreCase: true),
-                ReviewedAt = DateTime.UtcNow
+                ReviewedAt = DateTime.UtcNow,
+                CreatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
             };
 
             await _reviewRepository.CreateAsync(review);

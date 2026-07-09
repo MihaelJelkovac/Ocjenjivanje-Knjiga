@@ -1,6 +1,7 @@
 @model Review
 @{
     ViewData["Title"] = "Detalji recenzije";
+    bool canDelete = ViewBag.CanDelete == true;
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -26,4 +27,38 @@
     <p><strong>Preporuka:</strong> @(Model.IsRecommended ? "Da" : "Ne")</p>
     <p><strong>Datum:</strong> @Model.ReviewedAt.ToString("dd.MM.yyyy. HH:mm")</p>
     <p>@Model.Comment</p>
+
+    @if (canDelete)
+    {
+        <div class="d-flex gap-2 mt-3">
+            <a class="btn btn-secondary" asp-action="Index">Natrag na recenzije</a>
+            <button type="button" class="btn btn-danger" id="btn-delete-review" data-id="@Model.Id">Obriši recenziju</button>
+        </div>
+    }
 </section>
+
+@if (canDelete)
+{
+    <script>
+        document.getElementById('btn-delete-review')?.addEventListener('click', async function () {
+            if (!confirm('Jeste li sigurni da želite obrisati ovu recenziju?')) {
+                return;
+            }
+            const id = this.dataset.id;
+            try {
+                const response = await fetch(`/recenzije/delete/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/recenzije';
+                } else {
+                    alert('Greška: ' + data.message);
+                }
+            } catch {
+                alert('Greška pri brisanju recenzije');
+            }
+        });
+    </script>
+}

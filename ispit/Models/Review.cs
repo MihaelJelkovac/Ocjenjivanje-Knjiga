@@ -35,6 +35,12 @@ public class Review
 
     public virtual User User { get; set; } = default!;
 
+    /// <summary>
+    /// Identity korisnik (AppUser.Id) koji je kreirao recenziju — smije je i obrisati (uz Admina).
+    /// </summary>
+    [StringLength(450)]
+    public string? CreatedByUserId { get; set; }
+
     public DateTime? DeletedAt { get; set; }
 }
 
