@@ -102,11 +102,13 @@
     {
         <hr />
         <div class="mt-4">
-            <h3>Prilozi</h3>
+            <h3 class="mb-3">Prilozi</h3>
 
-            <div class="input-group mb-3">
-                <input type="file" class="form-control js-attachment-file" />
-                <button type="button" class="btn btn-outline-primary js-upload-attachment" data-book-id="@Model.Id">Učitaj</button>
+            <div class="form-group mb-3">
+                <div class="input-group">
+                    <input type="file" class="form-control js-attachment-file" />
+                    <button type="button" class="btn btn-outline-primary js-upload-attachment" data-book-id="@Model.Id">Učitaj</button>
+                </div>
             </div>
 
             <div id="attachment-list" data-book-id="@Model.Id"></div>

@@ -1,25 +1,46 @@
 @model IEnumerable<Lab5.Models.Attachment>
-
-<table class="table table-sm table-striped">
-    <thead>
-        <tr>
-            <th>Datoteka</th>
-            <th>Veličina</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var attachment in Model)
+@{
+    string FormatSize(long bytes)
+    {
+        if (bytes < 1024)
         {
-            <tr>
-                <td>
-                    <a href="@attachment.FilePath" target="_blank">@attachment.FileName</a>
-                </td>
-                <td>@attachment.FileSize</td>
-                <td class="text-end">
-                    <button type="button" class="btn btn-sm btn-danger js-delete-attachment" data-id="@attachment.Id">Obriši</button>
-                </td>
-            </tr>
+            return $"{bytes} B";
         }
-    </tbody>
-</table>
+        if (bytes < 1024 * 1024)
+        {
+            return $"{bytes / 1024.0:0.#} KB";
+        }
+        return $"{bytes / 1024.0 / 1024.0:0.#} MB";
+    }
+}
+
+@if (!Model.Any())
+{
+    <p class="panel-note mb-0">Nema priloženih datoteka.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table app-table">
+            <thead>
+                <tr>
+                    <th scope="col">Datoteka</th>
+                    <th scope="col">Veličina</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var attachment in Model)
+                {
+                    <tr>
+                        <td><a href="@attachment.FilePath" target="_blank">@attachment.FileName</a></td>
+                        <td>@FormatSize(attachment.FileSize)</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-danger js-delete-attachment" data-id="@attachment.Id">Obriši</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
