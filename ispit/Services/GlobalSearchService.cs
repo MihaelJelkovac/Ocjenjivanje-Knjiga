@@ -14,8 +14,10 @@ public class GlobalSearchResults
     public List<Author> Authors { get; set; } = new();
     public List<Genre> Genres { get; set; } = new();
     public List<Publisher> Publishers { get; set; } = new();
+    public List<Review> Reviews { get; set; } = new();
+    public List<User> Users { get; set; } = new();
 
-    public int TotalCount => Books.Count + Authors.Count + Genres.Count + Publishers.Count;
+    public int TotalCount => Books.Count + Authors.Count + Genres.Count + Publishers.Count + Reviews.Count + Users.Count;
 }
 
 public class GlobalSearchService : IGlobalSearchService
@@ -26,6 +28,8 @@ public class GlobalSearchService : IGlobalSearchService
     private readonly IAuthorRepository _authorRepository;
     private readonly IGenreRepository _genreRepository;
     private readonly IPublisherRepository _publisherRepository;
+    private readonly IReviewRepository _reviewRepository;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<GlobalSearchService> _logger;
 
     public GlobalSearchService(
@@ -33,12 +37,16 @@ public class GlobalSearchService : IGlobalSearchService
         IAuthorRepository authorRepository,
         IGenreRepository genreRepository,
         IPublisherRepository publisherRepository,
+        IReviewRepository reviewRepository,
+        IUserRepository userRepository,
         ILogger<GlobalSearchService> logger)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
         _genreRepository = genreRepository;
         _publisherRepository = publisherRepository;
+        _reviewRepository = reviewRepository;
+        _userRepository = userRepository;
         _logger = logger;
     }
 
@@ -87,6 +95,24 @@ public class GlobalSearchService : IGlobalSearchService
                 p.Name.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ||
                 p.City.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ||
                 p.Country.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase))
+            .Take(MaxResultsPerCategory)
+            .ToList();
+
+        var reviews = await _reviewRepository.GetAllAsync();
+        results.Reviews = reviews
+            .Where(r =>
+                r.Title.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ||
+                r.Comment.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ||
+                (r.Book != null && r.Book.Title.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase)))
+            .Take(MaxResultsPerCategory)
+            .ToList();
+
+        var users = await _userRepository.GetAllAsync();
+        results.Users = users
+            .Where(u =>
+                u.FullName.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ||
+                u.Username.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ||
+                u.Email.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase))
             .Take(MaxResultsPerCategory)
             .ToList();
 

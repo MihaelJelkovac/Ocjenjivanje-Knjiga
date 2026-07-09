@@ -102,8 +102,8 @@ public class PlaywrightTests : IAsyncLifetime
         // Arrange
         await _page!.GotoAsync($"{BaseUrl}/books", new() { WaitUntil = WaitUntilState.NetworkIdle });
 
-        // Act
-        var searchInput = await _page.QuerySelectorAsync("input[type='search'], input[placeholder*='search' i]");
+        // Act - cilja lokalni filter na Books stranici (#search-input), ne globalnu pretragu u navigaciji
+        var searchInput = await _page.QuerySelectorAsync("#search-input");
         if (searchInput != null)
         {
             await searchInput.FillAsync("Harry");

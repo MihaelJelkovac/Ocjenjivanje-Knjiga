@@ -1,4 +1,5 @@
 using Lab5.Data;
+using Lab5.Mcp;
 using Lab5.Models;
 using Lab5.Services;
 using Microsoft.AspNetCore.Identity;
@@ -8,21 +9,30 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog konfiguracija - koristi appsettings (Console za Production)
+// Serilog konfiguracija - appsettings.Production.json definira Console sink;
+// Development/base appsettings nemaju Serilog sekciju pa dobivaju Console fallback + file sink.
+const string logOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+
 builder.Host.UseSerilog((context, services, configuration) =>
+{
     configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
-        .Enrich.FromLogContext());
+        .Enrich.FromLogContext();
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console(
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-    )
-    .CreateLogger();
+    if (!context.Configuration.GetSection("Serilog").Exists())
+    {
+        configuration.WriteTo.Console(outputTemplate: logOutputTemplate);
+    }
 
-builder.Logging.AddSerilog(Log.Logger);
+    if (context.HostingEnvironment.IsDevelopment())
+    {
+        configuration.WriteTo.File(
+            path: "Logs/app-.log",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: logOutputTemplate);
+    }
+});
 
 var croatianCulture = CultureInfo.GetCultureInfo("hr-HR");
 CultureInfo.DefaultThreadCurrentCulture = croatianCulture;
@@ -76,6 +86,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookAccessService, BookAccessService>();
 builder.Services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
+// Register MCP server - izlaže katalog knjiga kao alate dostupne kroz agentic IDE (npr. Claude Code)
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithToolsFromAssembly();
+
 // Register AI Service
 builder.Services.AddHttpClient();
 var mistralApiKey = builder.Configuration["Mistral:ApiKey"] ?? "dummy-key-for-now";
@@ -125,6 +141,8 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapRazorPages();
+
+app.MapMcp("/mcp");
 
 app.Run();
 

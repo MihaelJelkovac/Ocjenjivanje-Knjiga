@@ -174,4 +174,66 @@ else
             </div>
         </section>
     }
+
+    if (Model.Reviews.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-reviews-heading">
+            <div class="panel-header">
+                <h3 id="search-reviews-heading">Recenzije (@Model.Reviews.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Naslov recenzije</th>
+                            <th scope="col">Knjiga</th>
+                            <th scope="col">Ocjena</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <tr>
+                                <td>@review.Title</td>
+                                <td>@(review.Book?.Title ?? "-")</td>
+                                <td>@review.Score/5</td>
+                                <td><a class="app-cta-link" asp-controller="Reviews" asp-action="Details" asp-route-id="@review.Id">Profil</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    if (Model.Users.Any())
+    {
+        <section class="panel-card mb-4" aria-labelledby="search-users-heading">
+            <div class="panel-header">
+                <h3 id="search-users-heading">Korisnici (@Model.Users.Count)</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table app-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ime</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td>@user.FullName</td>
+                                <td>@user.Email</td>
+                                <td><a class="app-cta-link" asp-controller="Users" asp-action="Details" asp-route-id="@user.Id">Profil</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
 }

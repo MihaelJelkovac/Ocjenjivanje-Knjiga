@@ -1,7 +1,6 @@
 using Lab5.Models;
 using Lab5.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -15,7 +14,6 @@ public class ReviewsController : Controller
     private readonly IBookRepository _bookRepository;
     private readonly IUserRepository _userRepository;
     private readonly IAIService _aiService;
-    private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<ReviewsController> _logger;
 
     public ReviewsController(
@@ -23,14 +21,12 @@ public class ReviewsController : Controller
         IBookRepository bookRepository,
         IUserRepository userRepository,
         IAIService aiService,
-        UserManager<AppUser> userManager,
         ILogger<ReviewsController> logger)
     {
         _reviewRepository = reviewRepository;
         _bookRepository = bookRepository;
         _userRepository = userRepository;
         _aiService = aiService;
-        _userManager = userManager;
         _logger = logger;
     }
 
@@ -247,16 +243,18 @@ public class ReviewsController : Controller
                 });
             }
 
-            // 3. Pronađi korisnika ili koristi default-a
+            // 3. AI prompt ne specificira recenzenta pa se, kao i kod ostalih CRUD akcija nad recenzijama,
+            // koristi prvi dostupni korisnik iz kataloga (Admin/Manager svejedno ručno bira UserId u standardnoj Create formi)
             var users = await _userRepository.GetAllAsync();
             var defaultUser = users.FirstOrDefault();
-            int userId = defaultUser?.Id ?? 1;
 
             if (defaultUser == null)
             {
                 _logger.LogWarning("⚠️ Nema dostupnih korisnika za recenziju");
-                return BadRequest(new { error = "Trebate biti ulogirani ili korisnik mora postojati" });
+                return BadRequest(new { error = "Nema dostupnih korisnika u sustavu" });
             }
+
+            var userId = defaultUser.Id;
 
             // 4. Kreiraj recenziju
             var review = new Review

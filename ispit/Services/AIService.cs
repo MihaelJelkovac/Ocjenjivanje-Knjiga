@@ -272,7 +272,7 @@ public class AIService : IAIService
 
     private bool IsCommonWord(string word)
     {
-        var common = new[] { "the", "a", "an", "and", "or", "but", "in", "on", "at", "je", "je", "je" };
+        var common = new[] { "the", "a", "an", "and", "or", "but", "in", "on", "at", "je" };
         return common.Contains(word);
     }
 }
